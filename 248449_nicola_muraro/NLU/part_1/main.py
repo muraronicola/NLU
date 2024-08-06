@@ -33,7 +33,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     #First experiment
     slot_f1s, intent_acc = [], []
     best_f1_ever = 0
-    best_model = None
+    best_model_ever = None
     print("Starting experiment 1...\n")
     
     for i in tqdm(range(0, runs)):
@@ -44,9 +44,9 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
         criterion_slots = nn.CrossEntropyLoss(ignore_index=pad_token)
         criterion_intents = nn.CrossEntropyLoss()
         
-        first_trained_model, new_best_f1 = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, best_f1_ever=best_f1_ever, device=device)
-        if new_best_f1 > best_f1_ever:
-            best_model = first_trained_model
+        first_trained_model, new_best_f1 = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
+        if new_best_f1 >= best_f1_ever:
+            best_model_ever = first_trained_model
             best_f1_ever = new_best_f1
             
         _, _, results_test, _, _, intent_test, _, _, _ = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang)
@@ -61,7 +61,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     #Second experiment
     slot_f1s, intent_acc = [], []
     best_f1_ever = 0
-    best_model = None
+    best_model_ever = None
     print("Starting experiment 2...\n")
     
     for i in tqdm(range(0, runs)):
@@ -72,9 +72,9 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
         criterion_slots = nn.CrossEntropyLoss(ignore_index=pad_token)
         criterion_intents = nn.CrossEntropyLoss()
         
-        first_trained_model, new_best_f1 = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, best_f1_ever=best_f1_ever, device=device)
-        if new_best_f1 > best_f1_ever:
-            best_model = first_trained_model
+        first_trained_model, new_best_f1 = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
+        if new_best_f1 >= best_f1_ever:
+            best_model_ever = first_trained_model
             best_f1_ever = new_best_f1
             
         _, _, results_test, _, _, intent_test, _, _, _ = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang)

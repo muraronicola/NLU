@@ -8,36 +8,34 @@ from tqdm import tqdm
 import numpy as np
 from torch import optim
 from sklearn.metrics import classification_report
+import re
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, best_f1_ever=0, device="cpu", n_epochs=2, clip=5, pad_token=0):  #default: n_epochs=100
+def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device="cpu", n_epochs=200, clip=5):  #default: n_epochs=200
     
     best_model = copy.deepcopy(model).to('cpu')
-    best_ppl = math.inf
     patience = 3
     best_f1 = 0
     
     for x in range(n_epochs):
         loss = train_loop(train_loader, optimizer, criterion_slots, criterion_intents, model, clip=clip)
         
-        if x % 1 == 0:
+        if x % 5 == 0:
             results_dev, _, _ = eval_loop(dev_loader, criterion_slots, criterion_intents, model, lang)
             f1 = results_dev['total']['f']
-            
             if f1 > best_f1:
                 best_f1 = f1
+                patience = 3
                 #The patient is reset every time we find a new best f1
-                if f1 > best_f1_ever:
-                    best_f1_ever = f1
-                    best_model = copy.deepcopy(model).to('cpu')
+                best_model = copy.deepcopy(model).to('cpu')
             else:
                 patience -= 1
             if patience <= 0: # Early stopping with patient
                 break # Not nice but it keeps the code clean
             
-    return best_model.to(device), best_f1_ever
+    return best_model.to(device), best_f1
 
 
-def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang, pad_token=0):
+def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang):
 
     results_train, intent_train, loss_train = eval_loop(train_loader, criterion_slots, criterion_intents, model, lang)
     results_dev, intent_dev, loss_dev = eval_loop(dev_loader, criterion_slots, criterion_intents, model, lang)
