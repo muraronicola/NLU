@@ -28,7 +28,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     
     #First experiment
-    first_model = LM_LSTM(emb_size=300, hidden_size=300, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"]).to(device)
+    first_model = LM_LSTM(emb_size=300, hidden_size=200, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"]).to(device)
     first_model.apply(init_weights)
     
     optimizer = optim.SGD(first_model.parameters(), lr=2.5)
@@ -41,7 +41,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     
     #Second experiment
-    second_model = LM_LSTM(emb_size=300, hidden_size=300, output_size=len(lang.word2id), emb_dropout=0.1, out_dropout=0.1, pad_index=lang.word2id["<pad>"]).to(device)
+    second_model = LM_LSTM(emb_size=300, hidden_size=200, output_size=len(lang.word2id), emb_dropout=0.1, out_dropout=0.1, pad_index=lang.word2id["<pad>"]).to(device)
     second_model.apply(init_weights)
     
     optimizer = optim.SGD(second_model.parameters(), lr=2.5)
@@ -54,7 +54,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     
     #Third experiment
-    third_model = LM_LSTM(emb_size=300, hidden_size=300, output_size=len(lang.word2id), emb_dropout=0.1, out_dropout=0.1, pad_index=lang.word2id["<pad>"]).to(device)
+    third_model = LM_LSTM(emb_size=300, hidden_size=200, output_size=len(lang.word2id), emb_dropout=0.1, out_dropout=0.1, pad_index=lang.word2id["<pad>"]).to(device)
     third_model.apply(init_weights)
     
     optimizer = optim.AdamW(third_model.parameters(), lr=0.0005)
