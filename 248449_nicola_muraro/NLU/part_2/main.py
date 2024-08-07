@@ -3,7 +3,49 @@
 
 # Import everything from functions.py file
 from functions import *
+from utils import LoadData
+from model import ModelIAS
+from torch import optim
+from transformers import BertTokenizer, BertModel
 
-if __name__ == "__main__":
-    #Wrtite the code to load the datasets and to run your functions
+
+if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
+    #Write the code to load the datasets and to run your functions
     # Print the results
+    
+    device = "mps:0"
+    pad_token = 0
+    
+    #Load the dataset
+    train_path = "./dataset/train.json"
+    test_path = "./dataset/test.json"
+    
+    tokenizer_bert_base = BertTokenizer.from_pretrained("bert-base-uncased") # Download the tokenizer
+    model_bert_base = BertModel.from_pretrained("bert-base-uncased") # Download the model
+    
+    load_data = LoadData(train_path, test_path, tokenizer_bert_base, device=device, pad_token=pad_token)
+    lang = load_data.get_lang()
+    train_loader, dev_loader, test_loader = load_data.get_dataset_loaders()
+    
+    
+    
+    out_slot = len(lang.slot2id)
+    out_int = len(lang.intent2id)
+    
+    seq_length = 51
+    hiddenSize_new = 768
+    
+    criterion_slots = nn.CrossEntropyLoss(ignore_index=pad_token)
+    criterion_intents = nn.CrossEntropyLoss()
+    
+    
+    
+    #First experiment
+    first_model = ModelIAS(model_bert_base, hiddenSize_new, out_slot, out_int, device=device).to(device)
+    first_model.apply(init_weights)
+    optimizer = optim.Adam(first_model.parameters(), lr=0.0001)
+    
+    first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
+    _, _, slot_test, _, _, intent_test, _, _, _ = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang, device=device)
+    
+    print_results(slot_test, intent_test)
