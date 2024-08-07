@@ -13,7 +13,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     #Write the code to load the datasets and to run your functions
     # Print the results
     
-    device = "mps:0"
+    device = "cuda:0"
     pad_token = 0
     
     #Load the dataset

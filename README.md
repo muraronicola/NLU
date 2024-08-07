@@ -22,3 +22,6 @@ in entrambi 2: forse ho invertito in evaluate e la print l'ordine tra i risultat
 
 2_2 different value of combination of the losses (for slots and intent)
 
+
+
+3_ in teria c'è già una funzione che converte le stringhe (nella eval)
