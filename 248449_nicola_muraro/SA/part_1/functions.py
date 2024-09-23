@@ -33,8 +33,8 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
         loss = train_loop(train_loader, optimizer, criterion_slots, model, device=device, clip=clip)
         
         if x % 1 == 0: #O metto 5?
-            slot_dev, _, = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
-            f1 = slot_dev['total']['f']
+            f1, _, = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
+            
             if f1 > best_f1:
                 best_f1 = f1
                 patience = 10
@@ -50,21 +50,17 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
 
 def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device="cpu"):
 
-    slot_train, intent_train = eval_loop(train_loader, criterion_slots, model, lang, pad_token, device=device)
-    slot_dev, intent_dev = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
-    slot_test, intent_test = eval_loop(test_loader, criterion_slots, model, lang, pad_token, device=device)
+    slot_train_f1, _ = eval_loop(train_loader, criterion_slots, model, lang, pad_token, device=device)
+    slot_dev_f1, _ = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
+    slot_test_f1, _ = eval_loop(test_loader, criterion_slots, model, lang, pad_token, device=device)
     
-    return slot_train, slot_dev, slot_test, intent_train, intent_dev, intent_test
+    return slot_train_f1, slot_dev_f1, slot_test_f1
 
 
-def print_results(slots, intent):
+def print_results(slot_f1s):
     print("\nResults of the experiment:")
     
-    slot_f1s = slots['total']['f']
-    intent_acc = intent['accuracy']
-    
     print('Slot F1', round(slot_f1s, 3))
-    print('Intent Acc', round(intent_acc, 3))
     print("\n")
     print("-"*50)
     print("\n")
@@ -87,7 +83,7 @@ def train_loop(data, optimizer, criterion_slots, model, device="cpu", clip=5):
         
         inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
         
-        slots = model(inputs_bert, tokenizedUtterance, sample['frase_testo'], length_token_bert, sample['text_suddiviso'])
+        slots = model(inputs_bert, sample['frase_testo'], length_token_bert, sample['text_suddiviso'])
         
         loss = criterion_slots(slots, sample['y_slots'])
         
@@ -103,9 +99,6 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
     model.eval()
     loss_array = []
     
-    ref_intents = []
-    hyp_intents = []
-    
     ref_slots = []
     hyp_slots = []
     
@@ -120,7 +113,7 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
             inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
             
             
-            slots, intents = model(inputs_bert, tokenizedUtterance)
+            slots = model(inputs_bert, sample['frase_testo'], sample['length_token_bert'], sample['text_suddiviso'])
             
             loss = criterion_slots(slots, sample['y_slots'])
             loss_array.append(loss.item())
@@ -200,7 +193,7 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
     
     scores = evaluate_ote(ref_slots, hyp_slots)
     f1_score = scores[2]
-        
+    
     return f1_score, loss_array
 
 def init_weights(mat):

@@ -30,7 +30,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     out_slot = len(lang.slot2id)
     
-    seq_length = 51
+    seq_length = 91 #51 it's changed for this assignemnt. WHY?
     hiddenSize_new = 768
     
     criterion_slots = nn.CrossEntropyLoss(ignore_index=pad_token)
@@ -42,7 +42,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     first_model.apply(init_weights)
     optimizer = optim.Adam(first_model.parameters(), lr=0.00005)
     
-    first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
-    _, _, slot_test, _, _, intent_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang, device=device)
+    first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device=device)
+    _, _, slot_test_f1 = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device=device)
     
-    print_results(slot_test, intent_test)
+    print_results(slot_test_f1)

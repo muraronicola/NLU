@@ -175,8 +175,17 @@ class Slots (data.Dataset):
                 lengths[parola] = len(tokenized['input_ids']) - 2  #C'è il cls e il sep
         return lengths
         
-    def __len__(self):
-        return len(self.utterances)
+    def mapping_seq(self, data, mapper):
+        res = []
+        for seq in data:
+            tmp_seq = []
+            for x in seq.split():
+                if x in mapper:
+                    tmp_seq.append(mapper[x])
+                else:
+                    tmp_seq.append(mapper[self.unk])
+            res.append(tmp_seq)
+        return res
 
 
 def collate_fn(data, pad_token=0, device="cpu"):
@@ -197,23 +206,20 @@ def collate_fn(data, pad_token=0, device="cpu"):
         padded_seqs = padded_seqs.detach()  # We remove these tensors from the computational graph
         return padded_seqs, lengths
     # Sort data by seq lengths
-    data.sort(key=lambda x: len(x['utterance']), reverse=True) 
+    data.sort(key=lambda x: len(x['plain_text']), reverse=True) 
     new_item = {}
     for key in data[0].keys():
         new_item[key] = [d[key] for d in data]
         
     # We just need one length for packed pad seq, since len(utt) == len(slots)
-    src_utt, _ = merge(new_item['utterance'])
+    src_utt, _ = merge(new_item['plain_text'])
     y_slots, y_lengths = merge(new_item["slots"])
-    intent = torch.LongTensor(new_item["intent"])
     
     src_utt = src_utt.to(device) # We load the Tensor on our selected device
     y_slots = y_slots.to(device)
-    intent = intent.to(device)
     y_lengths = torch.LongTensor(y_lengths).to(device)
     
     new_item["utterances"] = src_utt
-    new_item["intents"] = intent
     new_item["y_slots"] = y_slots
     new_item["slots_len"] = y_lengths
     return new_item

@@ -24,4 +24,14 @@ in entrambi 2: forse ho invertito in evaluate e la print l'ordine tra i risultat
 
 
 
-3_ in teria c'è già una funzione che converte le stringhe (nella eval)
+3_ in teria c'è già una funzione che converte le stringhe (nella eval) -> da usare (al momento lo sto ancora facendo "a mano")
+
+
+
+
+Modifico l'output in console in modo che sia più carino
+Magari printo anche dev e train
+
+
+
+INFINE: metto le epoche al valore corretto (al momento sono 1 o 2 per debug)
