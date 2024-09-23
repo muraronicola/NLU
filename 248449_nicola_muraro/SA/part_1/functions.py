@@ -21,7 +21,7 @@ import pickle
 SMALL_POSITIVE_CONST = 1e-4
 
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device="cpu", n_epochs=2, clip=5):  #default: n_epochs=200
+def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device="cpu", n_epochs=200, clip=5):  #default: n_epochs=200
     print("Starting experiment...\n")
     
     best_model = copy.deepcopy(model).to('cpu')
@@ -123,7 +123,53 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
             true_y = sample['y_slots'].detach().cpu().numpy()
             
             
+            
+            
             for sequenza in range(len(output_slots_hyp)):
+                #len_frase = len(sample['text_suddiviso'][sequenza])
+                try:
+                    first_index_of_pad = true_y[sequenza].tolist().index(pad_token)#Tricky, devo salvarmi quanta lunga è la predizione
+                    
+                    val_true_y = [lang.id2slot[element] for element in true_y[sequenza][:first_index_of_pad]]
+                    val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[sequenza][:first_index_of_pad]]
+                    
+                    converted_true_y = ot2bieos_ote(val_true_y)  #ot2bio_ote does not work
+                    converted_hat_y = ot2bieos_ote(val_hat_y)
+                    
+                    
+                    ref_slots.append(converted_true_y)
+                    hyp_slots.append(converted_hat_y)
+                    
+                except:
+                    val_true_y = [lang.id2slot[element] for element in true_y[sequenza][:first_index_of_pad]]
+                    val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[sequenza][:first_index_of_pad]]
+                    
+                    converted_true_y = ot2bieos_ote(val_true_y)
+                    converted_hat_y = ot2bieos_ote(val_hat_y)
+                    
+                    
+                    ref_slots.append(converted_true_y)
+                    hyp_slots.append(converted_hat_y)   
+            
+            
+            
+            """  #print(true_y)
+            #print(output_slots_hyp)
+            
+            val_true_y = [lang.id2slot[element] for element in true_y[0]]
+            val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[0]]
+            
+            #print(val_true_y)
+            #print(val_hat_y)
+            
+            converted_true_y = ot2bio_ote(val_true_y)
+            converted_hat_y = ot2bio_ote(val_hat_y)
+            
+            ref_slots.append(converted_true_y)
+            hyp_slots.append(converted_hat_y) """
+            
+            #print("\n\nend\n")
+            """ for sequenza in range(len(output_slots_hyp)):
                 #len_frase = len(sample['text_suddiviso'][sequenza])
                 try:
                     first_index_of_pad = true_y[sequenza].tolist().index(pad_token)#Tricky, devo salvarmi quanta lunga è la predizione
@@ -189,7 +235,7 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
                             tmpVal_out.append("O")   
                     
                     ref_slots.append(tmpVal_y)
-                    hyp_slots.append(tmpVal_out) 
+                    hyp_slots.append(tmpVal_out)  """
     
     scores = evaluate_ote(ref_slots, hyp_slots)
     f1_score = scores[2]

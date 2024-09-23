@@ -13,7 +13,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     #Write the code to load the datasets and to run your functions
     # Print the results
     
-    device = "mps:0"
+    device = "cuda:0"
     pad_token = 0
     
     #Load the dataset
@@ -30,7 +30,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     out_slot = len(lang.slot2id)
     
-    seq_length = 91 #51 it's changed for this assignemnt. WHY?
+    #seq_length = 91 #51 it's changed for this assignemnt. WHY?
     hiddenSize_new = 768
     
     criterion_slots = nn.CrossEntropyLoss(ignore_index=pad_token)
