@@ -13,7 +13,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     #Write the code to load the datasets and to run your functions
     # Print the results
     
-    device = "cuda:0"
+    device = "mps" #"cuda:0"
     pad_token = 0
     
     #Load the dataset
@@ -42,7 +42,10 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     first_model.apply(init_weights)
     optimizer = optim.Adam(first_model.parameters(), lr=0.00005)
     
-    first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device=device)
-    _, _, slot_test_f1 = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device=device)
+    #first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device=device)
+    #_, _, slot_test_f1 = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device=device)
+    #print_results(slot_test_f1)
     
-    print_results(slot_test_f1)
+    
+    #DEBUG
+    slot_train_f1, _ = eval_loop(train_loader, criterion_slots, first_model, lang, pad_token, device=device)

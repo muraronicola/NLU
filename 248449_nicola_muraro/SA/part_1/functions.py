@@ -134,19 +134,26 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
                     val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[sequenza][:first_index_of_pad]]
                     
                     converted_true_y = ot2bieos_ote(val_true_y)  #ot2bio_ote does not work
-                    converted_hat_y = ot2bieos_ote(val_hat_y)
+                    converted_hat_y = ot2bieos_ote(val_hat_y)   #t2 era: ot2bieos_ote
                     
+                    """ print("og true_y:", true_y[sequenza][:first_index_of_pad])
+                    print("og hat_y:", output_slots_hyp[sequenza][:first_index_of_pad])
+                    
+                    print("val_hat_y: ", val_true_y)
+                    print("val_hat_y: ", val_hat_y)
+                    
+                    print("converted_true_y: ", converted_true_y)
+                    print("converted_hat_y: ", converted_hat_y) """
                     
                     ref_slots.append(converted_true_y)
                     hyp_slots.append(converted_hat_y)
                     
                 except:
-                    val_true_y = [lang.id2slot[element] for element in true_y[sequenza][:first_index_of_pad]]
-                    val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[sequenza][:first_index_of_pad]]
+                    val_true_y = [lang.id2slot[element] for element in true_y[sequenza]]
+                    val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[sequenza]]
                     
                     converted_true_y = ot2bieos_ote(val_true_y)
                     converted_hat_y = ot2bieos_ote(val_hat_y)
-                    
                     
                     ref_slots.append(converted_true_y)
                     hyp_slots.append(converted_hat_y)   
@@ -239,6 +246,10 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
     
     scores = evaluate_ote(ref_slots, hyp_slots)
     f1_score = scores[2]
+    
+    print("\n\n\n\n\nRef slots: ", ref_slots)
+    print("Hyp slots: ", hyp_slots)
+    print("F1 score: ", f1_score)
     
     return f1_score, loss_array
 
