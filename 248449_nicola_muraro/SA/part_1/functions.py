@@ -17,9 +17,7 @@ np.random.seed(7894)
 import os
 import pickle
 
-
 SMALL_POSITIVE_CONST = 1e-4
-
 
 def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device="cpu", n_epochs=200, clip=5):  #default: n_epochs=200
     print("Starting experiment...\n")
@@ -32,7 +30,7 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
     for x in pbar:
         loss = train_loop(train_loader, optimizer, criterion_slots, model, device=device, clip=clip)
         
-        print("train Loss: ", loss)
+        #print("train Loss: ", loss)
         
         if x % 1 == 0: #O metto 5?
             f1, _, = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
@@ -179,9 +177,9 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
     
     scores = evaluate_ote(ref_slots, hyp_slots)
     
-    print("\n\n 5 preds: ")
+    """ print("\n\n 5 preds: ")
     print("ref_slots", ref_slots[:5])
-    print("hyp_slots", hyp_slots[:5])
+    print("hyp_slots", hyp_slots[:5]) """
     
     #print("scores: ", scores)
     f1_score = scores[2]

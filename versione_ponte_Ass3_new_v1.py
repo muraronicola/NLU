@@ -29,7 +29,7 @@ from utils import label2tag
 
 nltk.download('punkt')
 
-device = 'cuda:0' # cuda:0 means we are using the GPU with id 0, if you have multiple GPU
+device = 'mps' # cuda:0 means we are using the GPU with id 0, if you have multiple GPU
 train_batch_size = 64 #Con 128 crashava...
 test_batch_size = 32
 

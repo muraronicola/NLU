@@ -13,8 +13,8 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     #Write the code to load the datasets and to run your functions
     # Print the results
     
-    device = "cuda:0" #"cuda:0"
-    pad_token = 0
+    device = "mps" #"cuda:0"
+    pad_token = -1
     
     #Load the dataset
     train_path = "./dataset/laptop14_train.txt"
@@ -40,7 +40,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     #First experiment
     first_model = ModelIAS(model_bert_base, hiddenSize_new, out_slot, device=device).to(device)
     first_model.apply(init_weights)
-    optimizer = optim.Adam(model_bert_base.parameters(), lr=0.00005) #Non so nemmeno che modello devo ottimizzare
+    optimizer = optim.Adam(first_model.parameters(), lr=0.00005) #Non so nemmeno che modello devo ottimizzare
     
     first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device=device)
     _, _, slot_test_f1 = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device=device)
