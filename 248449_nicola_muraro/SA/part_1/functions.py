@@ -32,10 +32,12 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
     for x in pbar:
         loss = train_loop(train_loader, optimizer, criterion_slots, model, device=device, clip=clip)
         
+        print("train Loss: ", loss)
+        
         if x % 1 == 0: #O metto 5?
             f1, _, = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
             
-            if f1 > best_f1:
+            if f1 >= best_f1: #Era f1 > best_f1
                 best_f1 = f1
                 patience = 10
                 #The patient is reset every time we find a new best f1
@@ -123,6 +125,10 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
             true_y = sample['y_slots'].detach().cpu().numpy()
             
             
+            #output_slots_hyp = true_y  #FOR DEBUGGING ONLY, REMOVE BEFORE SUBMISSION
+            #ot2bieos_ote_batch(ref_labels_plain)
+            #ot2bieos_ote_batch(hyp_labels_plain)
+            #results = evaluate_ote(ot2)
             
             
             for sequenza in range(len(output_slots_hyp)):
@@ -155,102 +161,37 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
                     converted_true_y = ot2bieos_ote(val_true_y)
                     converted_hat_y = ot2bieos_ote(val_hat_y)
                     
+                    
+                    """ print("og true_y:", true_y[sequenza][:first_index_of_pad])
+                    print("og hat_y:", output_slots_hyp[sequenza][:first_index_of_pad])
+                    
+                    print("val_hat_y: ", val_true_y)
+                    print("val_hat_y: ", val_hat_y)
+                    
+                    print("converted_true_y: ", converted_true_y)
+                    print("converted_hat_y: ", converted_hat_y) """
+                    
                     ref_slots.append(converted_true_y)
                     hyp_slots.append(converted_hat_y)   
             
+            #exit(0)
             
-            
-            """  #print(true_y)
-            #print(output_slots_hyp)
-            
-            val_true_y = [lang.id2slot[element] for element in true_y[0]]
-            val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[0]]
-            
-            #print(val_true_y)
-            #print(val_hat_y)
-            
-            converted_true_y = ot2bio_ote(val_true_y)
-            converted_hat_y = ot2bio_ote(val_hat_y)
-            
-            ref_slots.append(converted_true_y)
-            hyp_slots.append(converted_hat_y) """
-            
-            #print("\n\nend\n")
-            """ for sequenza in range(len(output_slots_hyp)):
-                #len_frase = len(sample['text_suddiviso'][sequenza])
-                try:
-                    first_index_of_pad = true_y[sequenza].tolist().index(pad_token)#Tricky, devo salvarmi quanta lunga è la predizione
-                    
-                    tmpVal_y = []
-                    start = True
-                    for indice in range(len(true_y[sequenza][:first_index_of_pad])):
-                        elemento = true_y[sequenza][indice]
-                        val = lang.id2slot[elemento]
-                        if val == "T":
-                            if start:
-                                tmpVal_y.append("S")
-                            else:
-                                tmpVal_y.append("E")
-                            start = not start
-                        else:
-                            tmpVal_y.append("O")
-                    
-                    tmpVal_out = []
-                    start = True
-                    for indice in range(len(output_slots_hyp[sequenza][:first_index_of_pad])):
-                        elemento = output_slots_hyp[sequenza][indice]
-                        val = lang.id2slot[elemento]
-                        if val == "T":
-                            if start:
-                                tmpVal_out.append("S")
-                            else:
-                                tmpVal_out.append("E")
-                            start = not start
-                        else:
-                            tmpVal_out.append("O")
-                    
-                    ref_slots.append(tmpVal_y)
-                    hyp_slots.append(tmpVal_out)
-                    
-                except:
-                    tmpVal_y = []
-                    start = True
-                    for indice in range(len(true_y[sequenza])):
-                        elemento = true_y[sequenza][indice]
-                        val = lang.id2slot[elemento]
-                        if val == "T":
-                            if start:
-                                tmpVal_y.append("S")
-                            else:
-                                tmpVal_y.append("E")
-                            start = not start
-                        else:
-                            tmpVal_y.append("O")
-                    
-                    tmpVal_out = []
-                    start = True
-                    for indice in range(len(output_slots_hyp[sequenza])):
-                        elemento = output_slots_hyp[sequenza][indice]
-                        val = lang.id2slot[elemento]
-                        if val == "T":
-                            if start:
-                                tmpVal_out.append("S")
-                            else:
-                                tmpVal_out.append("E")
-                            start = not start
-                        else:
-                            tmpVal_out.append("O")   
-                    
-                    ref_slots.append(tmpVal_y)
-                    hyp_slots.append(tmpVal_out)  """
     
     scores = evaluate_ote(ref_slots, hyp_slots)
+    
+    print("\n\n 5 preds: ")
+    print("ref_slots", ref_slots[:5])
+    print("hyp_slots", hyp_slots[:5])
+    
+    #print("scores: ", scores)
     f1_score = scores[2]
     
-    print("\n\n\n\n\nRef slots: ", ref_slots)
+    """ print("\n\n\n\n\nRef slots: ", ref_slots)
     print("Hyp slots: ", hyp_slots)
-    print("F1 score: ", f1_score)
+    print("F1 score: ", f1_score) """
     
+    print("F1 score: ", f1_score)
+    #exit(0)
     return f1_score, loss_array
 
 def init_weights(mat):
