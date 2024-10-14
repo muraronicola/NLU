@@ -13,7 +13,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     #Write the code to load the datasets and to run your functions
     # Print the results
     
-    device = "mps" #"cuda:0"
+    device = "cuda:0" #"cuda:0"
     pad_token = -1
     
     #Load the dataset
@@ -46,6 +46,3 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     _, _, slot_test_f1 = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device=device)
     print_results(slot_test_f1)
     
-    
-    #DEBUG
-    slot_train_f1, _ = eval_loop(train_loader, criterion_slots, first_model, lang, pad_token, device=device)
