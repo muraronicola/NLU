@@ -35,3 +35,10 @@ Magari printo anche dev e train
 
 
 INFINE: metto le epoche al valore corretto (al momento sono 1 o 2 per debug)
+
+
+
+
+
+-> I DATI sono un po' da rivedere. 
+AGGIUNGO IL TRAIN NEL FILE CSV
