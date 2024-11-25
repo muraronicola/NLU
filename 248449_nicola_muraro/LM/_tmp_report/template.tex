@@ -14,44 +14,54 @@
 
 \maketitle
 
-\section{Introduction (approx. 100 words)}
-Lo scopo di questo laboratorio era quello di implementare un language model basato su architetture di tipo neurale.
-In pratica, il compito di questo modello è quello di predirre il token successivo dato un insieme di token chiamato contesto.
-Per arrivare a questo obbiettivo abbiamo adoperato un LSTM sul quale sono state effettuate le analisi qui riportate. Ho implementato una serie di tecniche con lo scopo di migliorare le performance del nostro modello, tra cui l’utilizzo di diversi tipi di ottimizzatori e tecniche di regolarizzazione. In questo report sono brevemente riportati i vari studi effettuati e i relativi risultati che ne conseguono.
+\section{Introduction}
+The purpose of this assignment is to implement a language model based on neural architectures.
+Specifically, the task of this model is to predict the next token given a set of tokens, referred to as the context.
+To achieve this goal, I used an LSTM on which several modifications were made to improve its performance. 
+In the first part of the assignment, various optimisers were analysed alongside the use of dropout. In the second part, instead I implemented more sophisticated regularisation techniques described in this article \cite{merity2017regularizing}.
+This report briefly summarises the studies conducted and the results.
 
-\section{Implementation details (max approx. 200-300 words)}
-Questo assigment era composto da due parti, per entrambe l’unico requirement è che la perplexity fosse <= 250.
+\section{Implementation details}
+The only requirement for both parts of the assignment is that the perplexity must be below 250.
 
-La prima parte di questo assignment consisteva nello studio di LSTM come base della nostra architettura, eseguendo successivamente due modifiche incrementali: aggiungere dei livelli di dropout ed utilizzare AdamW.
-Ho iniziato semplicemente sostituendo l’architettura originale (basata su RNN) con LSTM, per ottenere un primo valore da utilizzare come baseline. Visto che quest’ultimo era di molto al di sopra del requirement, ho provveduto ad incrementare il learning rate fino a 1.5. Il modello risultante è stato di gran lunga migliore e soddisfaceva i requirement del progetto.
-Ho provveduto dunque ad effettuare la prima modifica incrementare: aggiungere i livelli di dropout. Il primo posizionato dopo l’embedding e l’altro prima dell’output layer, in entrambi i casi il valore più efficace di dropout è stato 0.1, il quale ha migliorato i risultati precedentemente ottenuti. 
-Infine, ho implementato l’ultima modifica prevista dalla consegna, andando a sostituire SGD con AdamW. Modificando opportunamente il learning rate (riducendolo fino a 0.0005) ha consentito all’architettura di migliorare ulteriormente i risultati. Concludendo così questa prima parte dell’assignemnt.
+The first part of this assignment focuses on studying LSTM as the foundation of our architecture, followed by two incremental modifications: adding dropout layers and using AdamW.
+I started by replacing the original architecture (based on RNN) with LSTM to establish an initial baseline.
+Next, I made the first modification by adding dropout layers: one after the embedding layer and another before the output layer. In both cases, the most effective dropout value was 0.1.
+Finally, I implemented the last required modification by replacing SGD with AdamW. Since changing the optimiser also requires adjusting the learning rate, I made the necessary adjustments to the learning rate to ensure an optimal performance.
 
-
-La seconda parte invece, prevedeva di partire dalla prima rete creata (formata da LSTM con SGD) ed applicare incrementalmente delle tecniche di regolarizzazione, descritte in questo articolo \cite{merity2017regularizing}. 
-Per prima cosa, ho utilizzato la tecnica di weight tying tra il layer degli embedding e l’output layer. Entrambi questi livelli devono avere la stessa dimensione, conseguentemente la dimensione dell’embedding layer è stata incrementata a 300. La rete utilizzante questa tecnica ha ottenuto risultati migliori rispetto alla precedente.
-Successivamente, ho aggiunto Variational Dropout: tecnica che prevede di utilizzare la stessa maschera per eseguire dropout, cambiandola tra epoche e/o in layer diversi. Testando le varie combinazioni, sono arrivato ad ottenere delle performance ancora migliori rispetto al caso precedente.
-Infine sono passato ad implementare Non-monotonically Triggered AvSGD, una variante di AvSGD dove T viene determinato durante il training della rete e non fissato a priori.
-Applicando questa tecnica, i risultati sono leggermente peggiorati.
-
+The second part involves starting from the initial network (LSTM with SGD) and incrementally applying regularisation techniques outlined in this article \cite{merity2017regularizing}.
+First, I implemented weight tying between the embedding layer and the output layer.
+This technique allows multiple layers in the network to share the same weights, aiming to regularise the entire architecture.
+To enable weight sharing, the layers involved must have the same dimensions, so I adjusted their sizes to ensure compatibility.
+The second modification involved using Variational Dropout, a technique that applies the same dropout mask.
+In practice, this means reusing the same dropout mask instead of sampling a new one at each model call.
+With this setup, the mask can be changed once per epoch and/or differ between layers.
+During my tests, I experimented with both approaches to determine the most effective configuration.
+Finally, I implemented the last modification: using Non-monotonically Triggered AvSGD. This is a variant of AvSGD where the switch to AvSGD is based on the network’s state during training.
+Specifically, if SGD fails to improve the solution over several consecutive epochs, it is replaced with AvSGD in the hope of further optimizing the solution.
+Since the timing of this switch is not predetermined, this technique is expected to provide additional performance improvements compared to both standard SGD and AvSGD.
 
 \section{Results}
-I risultati che ho ottenuto per valutare la bontà delle varie tecniche implementate, sono stati effettuati considerando l’evaluation set. Questo è stato fatto per avere una miglior capacità di generalizzazione sul test set, utilizzando l’evaluation set come campo di test per modificare i vari iperparametri. 
+The results used to evaluate the effectiveness of the implemented techniques were obtained using the evaluation set. This approach ensures better generalisation. Using the evaluation set to fine-tune hyper-parameters and find an optimal configuration allows for more reliable results on the test set.
+In general, the best machine learning models have high capacity and are properly regularised. Since many of the previously applied techniques are forms of regularisation, I started with a relatively large model.
+For all configurations, the batch size was kept constant at 64.
+
+
+In the first part, the initial model was created with the following specifications: \(hid \textunderscore size=500, out \textunderscore size=600, lr=1.5\).
+The use of dropout yielded better results with a probability of \(p=0.2\). Finally, after replacing the optimizer with AdamW, I adjusted the learning rate to 0.0001.
+As we can see from the results shown in table \ref{tab:results1}, all the modifications led to improved performance. Therefore, they were all kept in the final configuration.
 
 \vspace{0.5cm}
 
-La prima parte dell'assignment ha portato ai risultati riportati in Tabella \ref{tab:results1}. Come si può notare, il modello con LSTM e AdamW ha ottenuto i migliori risultati, con una perplexity di 250.0.
 \begin{table}[h]
   \centering
-  \begin{tabular}{|c|c|c|c|}
+  \begin{tabular}{|c|c|c|}
     \hline
-    \textbf{Model} & \textbf{Perplexity} & \textbf{Dropout} & \textbf{Optimizer} \\
+    \textbf{Model} & \textbf{Eval PPL} & \textbf{Test PPL} \\
     \hline
-    RNN &  300.0 & 0.0 & SGD \\
-    LSTM &  250.0 & 0.0 & SGD \\
-    LSTM &  250.0 & 0.0 & SGD \\
-    LSTM &  250.0 & 0.1 & SGD \\
-    LSTM &  250.0 & 0.1 & AdamW \\
+    LSTM & 300.0 & 100.0 \\
+    LSTM with dropout & 300.0 & 100.0 \\
+    LSTM with dropout, AdamW & 300.0 & 100.0 \\
     \hline
   \end{tabular}
   \caption{Perplexity values for the first part of the assignment}
@@ -59,41 +69,42 @@ La prima parte dell'assignment ha portato ai risultati riportati in Tabella \ref
 
 \end{table}
 
-La miglior rete ottenuta, presentava questa dinamica di training:
 
-\begin{figure}[h!]
-  \includegraphics[width=\linewidth]{./images/plot_1.png}
-  \caption{A boat.}
-  \label{fig:boat1}
-\end{figure}
-
-
-Per quanto riguarda la seconda parte dell’assignment, i risultati ottenuti sono riportati in Tabella \ref{tab:results2}. Come si può notare, il modello con weight tying e variational dropout ha ottenuto i migliori risultati, con una perplexity di 250.0.
+For the second part, starting with the same configuration as before \((hid \textunderscore size=500, out \textunderscore size=600, lr=1.5)\), I modified the layer sizes to use weight tying.
+The model now has \(hid \textunderscore size=out \textunderscore size=600\).
+Regarding Variational Dropout, I tested all four possible combinations for changing the mask: (1) one mask for both layers (fixed); (2) one mask for both layers (changed every epoch); (3) two masks (one per layer, fixed); (4) two masks (one per layer, changed every epoch). The best performance was achieved with the third option: using a different mask for each layer of dropout and changing it every epoch.
+Finally, as shown in table \ref{tab:results2}, I completed the assignment using NT-AvSGD, which resulted in the best performance.
 
 \begin{table}[h]
   \centering
-  \begin{tabular}{|c|c|c|c|}
+  \begin{tabular}{|c|c|c|}
     \hline
-    \textbf{Model} & \textbf{Perplexity} & \textbf{Dropout} & \textbf{Optimizer} \\
+    \textbf{Tecnique} & \textbf{Eval PPL} & \textbf{Test PPL} \\
     \hline
-    RNN &  300.0 & 0.0 & SGD \\
-    LSTM &  250.0 & 0.0 & SGD \\
-    LSTM &  250.0 & 0.0 & SGD \\
-    LSTM &  250.0 & 0.1 & SGD \\
-    LSTM &  250.0 & 0.1 & AdamW \\
+    W.Tying & 300.0 & 100.0 \\
+    W.Tying, Var.Drop. & 300.0 & 100.0 \\
+    W.Tying, Var.Drop., NT-AvSGD & 300.0 & 100.0 \\
     \hline
   \end{tabular}
-  \caption{Perplexity values for the first part of the assignment}
+  \caption{Perplexity values for the second part of the assignment}
   \label{tab:results2}
 
 \end{table}
 
 
-La miglior rete ottenuta, presentava questa dinamica di training:
-\begin{figure}[h!]
-  \includegraphics[width=\linewidth]{./images/plot_2.png}
-  \caption{A boat.}
-  \label{fig:boat1}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{./images/plot_1_loss.png}
+  \caption{Trainig loss for the best model of the first part}
+  \label{fig:Trainig loss for the best model of the first part}
+\end{figure}
+
+
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{./images/plot_2_loss.png}
+  \caption{Trainig loss for the best model of the second part}
+  \label{fig:Trainig loss for the best model of the second part}
 \end{figure}
 
 
