@@ -50,6 +50,7 @@ For all configurations, the batch size was kept constant at 64.
 In the first part, the initial model was created with the following specifications: \(hid \textunderscore size=500, out \textunderscore size=600, lr=1.5\).
 The use of dropout yielded better results with a probability of \(p=0.2\). Finally, after replacing the optimizer with AdamW, I adjusted the learning rate to 0.0001.
 As we can see from the results shown in table \ref{tab:results1}, all the modifications led to improved performance. Therefore, they were all kept in the final configuration.
+The training process of the model is depicted in Figure \ref{fig:fig1}.
 
 \begin{table}[h]
   \centering
@@ -67,11 +68,18 @@ As we can see from the results shown in table \ref{tab:results1}, all the modifi
 
 \end{table}
 
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{./images/plot_1_loss.png}
+  \caption{Trainig loss for the best model of the first part}
+  \label{fig:fig1}
+\end{figure}
+
 
 For the second part, starting with the same configuration as before \((hid \textunderscore size=500, out \textunderscore size=600, lr=1.5)\), I modified the layer sizes to use weight tying.
 The model now has \(hid \textunderscore size=out \textunderscore size=600\).
 Regarding Variational Dropout, I tested all four possible combinations for changing the mask: (1) one mask for both layers (fixed); (2) one mask for both layers (changed every epoch); (3) two masks (one per layer, fixed); (4) two masks (one per layer, changed every epoch). The best performance was achieved with the third option: using a different mask for each layer of dropout and changing it every epoch.
 Finally, as shown in table \ref{tab:results2}, I completed the assignment using NT-AvSGD, which resulted in the best performance.
+In Figure \ref{fig:fig2}, the model's training progression is represented.
 
 \begin{table}[h]
   \centering
@@ -89,20 +97,10 @@ Finally, as shown in table \ref{tab:results2}, I completed the assignment using 
 
 \end{table}
 
-
-
-\begin{figure}
-  \includegraphics[width=\linewidth]{./images/plot_1_loss.png}
-  \caption{Trainig loss for the best model of the first part}
-  \label{fig:Trainig loss for the best model of the first part}
-\end{figure}
-
-
-
-\begin{figure}
+\begin{figure}[h]
   \includegraphics[width=\linewidth]{./images/plot_2_loss.png}
   \caption{Trainig loss for the best model of the second part}
-  \label{fig:Trainig loss for the best model of the second part}
+  \label{fig:fig2}
 \end{figure}
 
 
