@@ -21,8 +21,11 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
-\bibitem{merity2017regularizing}
-S.~Merity, N.~S. Keskar, and R.~Socher, ``Regularizing and optimizing lstm
-  language models,'' \emph{arXiv preprint arXiv:1708.02182}, 2017.
+\bibitem{BERT}
+\BIBentryALTinterwordspacing
+Q.~Chen, Z.~Zhuo, and W.~Wang, ``{BERT} for joint intent classification and
+  slot filling,'' \emph{CoRR}, vol. abs/1902.10909, 2019. [Online]. Available:
+  \url{http://arxiv.org/abs/1902.10909}
+\BIBentrySTDinterwordspacing
 
 \end{thebibliography}

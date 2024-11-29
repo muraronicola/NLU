@@ -3,7 +3,7 @@
 \usepackage{INTERSPEECH2021}
 
 % Put the lab number of the corresponding exercise
-\title{NLU course projects lab 4}
+\title{NLU course projects lab 5: NLU}
 \name{Nicola Muraro (248449)}
 
 \address{
@@ -15,93 +15,76 @@
 \maketitle
 
 \section{Introduction}
-The purpose of this assignment is to implement a language model based on neural architectures.
-Specifically, the task of this model is to predict the next token given a set of tokens, referred to as the context.
-To achieve this goal, I used an LSTM on which several modifications were made to improve its performance. 
-In the first part of the assignment, various optimisers were analysed alongside the use of dropout. In the second part, instead I implemented more sophisticated regularisation techniques described in this article \cite{merity2017regularizing}.
-This report briefly summarises the studies conducted and the results.
+In this laboratory, the objective consisted of two tasks: slot filling and intent classification. In the first case, we aim to assign a label to each token within our input sequence to understand the role each token plays within the utterance. In intent classification, on the other hand, we aim to predict a single label for each input sequence, with the goal of extracting the intent of the entire provided input.
+To achieve these objectives, we started by using a simple RNN, on which we implemented several techniques to improve performance.
+During the second part, we changed the type of architecture, using BERT as the backbone and performing a fine-tuning process on it to align its predictions with our tasks.
+
 
 \section{Implementation details}
-The only requirement for both parts of the assignment is that the perplexity must be below 250.
+For the first part of the assignment, starting from the architecture provided in the lab, I simply added the bidirectionality to the LSTM component by using the appropriate parameter in the PyTorch function.
+Consequently, the output dimension of this component is doubled, as we now have the concatenated outputs of the forward and reverse processes. To ensure compatibility with the network layer responsible for slot prediction, I adjusted its input size by doubling it.
+The next modification involved adding dropout to the architecture.
+This technique can be applied in various part of the code: after the utterance embedding, before the two prediction heads, or in both places. To determine the optimal position for this technique, I tested all three scenarios separately, allowing me to draw an empirical conclusion.
+\newline
 
-The first part of this assignment focuses on studying LSTM as the foundation of our architecture, followed by two incremental modifications: adding dropout layers and using AdamW.
-I started by replacing the original architecture (based on RNN) with LSTM to establish an initial baseline.
-Next, I made the first modification by adding dropout layers: one after the embedding layer and another before the output layer. In both cases, the most effective dropout value was 0.1.
-Finally, I implemented the last required modification by replacing SGD with AdamW. Since changing the optimiser also requires adjusting the learning rate, I made the necessary adjustments to the learning rate to ensure an optimal performance.
-
-The second part involves starting from the initial network (LSTM with SGD) and incrementally applying regularisation techniques outlined in this article \cite{merity2017regularizing}.
-First, I implemented weight tying between the embedding layer and the output layer.
-This technique allows multiple layers in the network to share the same weights, aiming to regularise the entire architecture.
-To enable weight sharing, the layers involved must have the same dimensions, so I adjusted their sizes to ensure compatibility.
-The second modification involved using Variational Dropout, a technique that applies the same dropout mask.
-In practice, this means reusing the same dropout mask instead of sampling a new one at each model call.
-With this setup, the mask can be changed once per epoch and/or differ between layers.
-During my tests, I experimented with both approaches to determine the most effective configuration.
-Finally, I implemented the last modification: using Non-monotonically Triggered AvSGD. This is a variant of AvSGD where the switch to AvSGD is based on the network’s state during training.
-Specifically, if SGD fails to improve the solution over several consecutive epochs, it is replaced with AvSGD in the hope of further optimizing the solution.
-Since the timing of this switch is not predetermined, this technique is expected to provide additional performance improvements compared to both standard SGD and AvSGD.
+In the second part of the assignment, we adopted a different approach to the problem. Starting with BERT, a pretrained language understanding model based on transformers, we performed fine-tuning to adapt the model to our tasks.
+This kind of implementation was detailed in the following paper \cite{BERT}. Specifically, the network I designed consists of BERT-base, a dropout layer, and two projection heads (one for each task).
+First, the utterance was tokenized using a tokenizer specific to BERT: the BertTokenizer.
+Additionally, BERT requires all input utterances to have the same length. Consequently, I added padding to the utterances and slots to ensure uniform length, making them comparable for metric computation and performance evaluation of the created model.
+Then, when using the model, the utterance (already tokenized and padded) is passed as input to BERT, which generates an embedding for the provided input. This hidden state is passed through a dropout layer and used as input for both projection heads. The first token in the sequence is utilized by one prediction head to predict the intent, while the remaining tokens are fed into the other prediction head to perform slot filling.
 
 \section{Results}
-The results used to evaluate the effectiveness of the implemented techniques were obtained using the evaluation set. This approach ensures better generalisation. Using the evaluation set to fine-tune hyper-parameters and find an optimal configuration allows for more reliable results on the test set.
-In general, the best machine learning models have high capacity and are properly regularised. Since many of the previously applied techniques are forms of regularisation, I started with a relatively large model.
-For all configurations, the batch size was kept constant at 64.
+As in the previous assignment, I used the validation set to adjust the hyperparameters, ignoring their impact on the test set. This approach allows the test set to be evaluated only at the end, providing more reliable performance metrics for the model.
 
+For all the results reported below, I used the Adam optimizer with a learning rate of \(lr = 0.0001\). Additionally, the batch sizes for the train and test sets remained unchanged at \(64\) and \(128\), respectively.
 
-In the first part, the initial model was created with the following specifications: \(hid \textunderscore size=500, out \textunderscore size=600, lr=1.5\).
-The use of dropout yielded better results with a probability of \(p=0.2\). Finally, after replacing the optimizer with AdamW, I adjusted the learning rate to 0.0001.
-As we can see from the results shown in table \ref{tab:results1}, all the modifications led to improved performance. Therefore, they were all kept in the final configuration.
+For the first part of the assignment, adding both bidirectionality and dropout layers improved the proposed model’s performance, as shown in Table \ref{tab:results1}. Specifically, I empirically found that applying dropout both after the utterance embedding and before the two prediction heads yielded the best results.
+The configuration used for this part was: \(emb \textunderscore size=300, hid \textunderscore size=300\).
+For each test, \(5\) runs were performed, and the resulting values were averaged.
 
-\vspace{0.5cm}
 
 \begin{table}[h]
   \centering
   \begin{tabular}{|c|c|c|}
     \hline
-    \textbf{Model} & \textbf{Eval PPL} & \textbf{Test PPL} \\
+    \textbf{Model} & \textbf{Slot F1} & \textbf{Intent Acc} \\
     \hline
-    LSTM & 300.0 & 100.0 \\
-    LSTM with dropout & 300.0 & 100.0 \\
-    LSTM with dropout, AdamW & 300.0 & 100.0 \\
+    IAS bidirectional& 300.0 & 100.0 \\
+    IAS bidirectional + dropout & 300.0 & 100.0 \\
     \hline
   \end{tabular}
-  \caption{Perplexity values for the first part of the assignment}
+  \caption{Slot filling and intent performance for the first part of the assignment. The values shown are obtained on the test set.}
   \label{tab:results1}
 
 \end{table}
 
-
-For the second part, starting with the same configuration as before \((hid \textunderscore size=500, out \textunderscore size=600, lr=1.5)\), I modified the layer sizes to use weight tying.
-The model now has \(hid \textunderscore size=out \textunderscore size=600\).
-Regarding Variational Dropout, I tested all four possible combinations for changing the mask: (1) one mask for both layers (fixed); (2) one mask for both layers (changed every epoch); (3) two masks (one per layer, fixed); (4) two masks (one per layer, changed every epoch). The best performance was achieved with the third option: using a different mask for each layer of dropout and changing it every epoch.
-Finally, as shown in table \ref{tab:results2}, I completed the assignment using NT-AvSGD, which resulted in the best performance.
-
-\begin{table}[h]
-  \centering
-  \begin{tabular}{|c|c|c|}
-    \hline
-    \textbf{Tecnique} & \textbf{Eval PPL} & \textbf{Test PPL} \\
-    \hline
-    W.Tying & 300.0 & 100.0 \\
-    W.Tying, Var.Drop. & 300.0 & 100.0 \\
-    W.Tying, Var.Drop., NT-AvSGD & 300.0 & 100.0 \\
-    \hline
-  \end{tabular}
-  \caption{Perplexity values for the second part of the assignment}
-  \label{tab:results2}
-
-\end{table}
-
-
-
-\begin{figure}
+\begin{figure}[h]
   \includegraphics[width=\linewidth]{./images/plot_1_loss.png}
   \caption{Trainig loss for the best model of the first part}
   \label{fig:Trainig loss for the best model of the first part}
 \end{figure}
 
+In the second part, the input size for the two prediction heads had to match the dimension of BERT’s last hidden state. Due to this fact, both were set to 768.
+The loss in this case was a weighted average of the loss for intents and slots. I empirically determined that the best combination was: \(combined \textunderscore loss = loss \textunderscore intent * 0.1 + loss \textunderscore slot * 0.9\).
+The performance of this model was evaluated over a single run because the training time for this type of architecture is significantly higher compared to the first one. The results are shown in Table \ref{tab:results2}.
 
+From both tables, we can observe that training a model from scratch achieved slightly better performance than fine-tuning BERT. 
+Still, in both cases the results obtained are very good for both of this tasks.
 
-\begin{figure}
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Model} & \textbf{Slot F1} & \textbf{Intent Acc} \\
+    \hline
+    BERT finetuned& 300.0 & 100.0 \\
+    \hline
+  \end{tabular}
+  \caption{Slot filling and intent performance for the second part of the assignment. The values shown are obtained on the test set.}
+  \label{tab:results2}
+\end{table}
+
+\begin{figure}[h]
   \includegraphics[width=\linewidth]{./images/plot_2_loss.png}
   \caption{Trainig loss for the best model of the second part}
   \label{fig:Trainig loss for the best model of the second part}

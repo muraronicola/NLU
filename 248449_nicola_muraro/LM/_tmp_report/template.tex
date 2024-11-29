@@ -3,7 +3,7 @@
 \usepackage{INTERSPEECH2021}
 
 % Put the lab number of the corresponding exercise
-\title{NLU course projects lab 4}
+\title{NLU course projects lab 4: LM}
 \name{Nicola Muraro (248449)}
 
 \address{
@@ -50,8 +50,6 @@ For all configurations, the batch size was kept constant at 64.
 In the first part, the initial model was created with the following specifications: \(hid \textunderscore size=500, out \textunderscore size=600, lr=1.5\).
 The use of dropout yielded better results with a probability of \(p=0.2\). Finally, after replacing the optimizer with AdamW, I adjusted the learning rate to 0.0001.
 As we can see from the results shown in table \ref{tab:results1}, all the modifications led to improved performance. Therefore, they were all kept in the final configuration.
-
-\vspace{0.5cm}
 
 \begin{table}[h]
   \centering
