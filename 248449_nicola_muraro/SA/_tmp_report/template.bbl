@@ -21,11 +21,18 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
-\bibitem{BERT}
+\bibitem{hu2019opendomaintargetedsentimentanalysis}
 \BIBentryALTinterwordspacing
-Q.~Chen, Z.~Zhuo, and W.~Wang, ``{BERT} for joint intent classification and
-  slot filling,'' \emph{CoRR}, vol. abs/1902.10909, 2019. [Online]. Available:
-  \url{http://arxiv.org/abs/1902.10909}
+M.~Hu, Y.~Peng, Z.~Huang, D.~Li, and Y.~Lv, ``Open-domain targeted sentiment
+  analysis via span-based extraction and classification,'' 2019. [Online].
+  Available: \url{https://arxiv.org/abs/1906.03820}
+\BIBentrySTDinterwordspacing
+
+\bibitem{li2019unifiedmodelopiniontarget}
+\BIBentryALTinterwordspacing
+X.~Li, L.~Bing, P.~Li, and W.~Lam, ``A unified model for opinion target
+  extraction and target sentiment prediction,'' 2019. [Online]. Available:
+  \url{https://arxiv.org/abs/1811.05082}
 \BIBentrySTDinterwordspacing
 
 \end{thebibliography}

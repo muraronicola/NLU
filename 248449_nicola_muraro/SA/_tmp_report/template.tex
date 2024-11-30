@@ -3,7 +3,7 @@
 \usepackage{INTERSPEECH2021}
 
 % Put the lab number of the corresponding exercise
-\title{NLU course projects lab 5: NLU}
+\title{NLU course projects lab 6: SA}
 \name{Nicola Muraro (248449)}
 
 \address{
@@ -15,81 +15,49 @@
 \maketitle
 
 \section{Introduction}
-In this laboratory, the objective consisted of two tasks: slot filling and intent classification. In the first case, we aim to assign a label to each token within our input sequence to understand the role each token plays within the utterance. In intent classification, on the other hand, we aim to predict a single label for each input sequence, with the goal of extracting the intent of the entire provided input.
-To achieve these objectives, we started by using a simple RNN, on which we implemented several techniques to improve performance.
-During the second part, we changed the type of architecture, using BERT as the backbone and performing a fine-tuning process on it to align its predictions with our tasks.
-
+This last assignment is about the task of aspect-based sentiment analysis.
+In this type of task, we generally aim to identify the polarity that each token has within the sentence. However, in our case, we focused on a slightly simpler task: the extraction of terms within the sentence, ignoring the part involving the prediction of their polarity.
+To achieve this, we once again started by using a pre-trained language model. For this part we used BERT also in this case. We then performed fine-tuning of this model to align the architecture’s predictions with our specific use case.
 
 \section{Implementation details}
-For the first part of the assignment, starting from the architecture provided in the lab, I simply added the bidirectionality to the LSTM component by using the appropriate parameter in the PyTorch function.
-Consequently, the output dimension of this component is doubled, as we now have the concatenated outputs of the forward and reverse processes. To ensure compatibility with the network layer responsible for slot prediction, I adjusted its input size by doubling it.
-The next modification involved adding dropout to the architecture.
-This technique can be applied in various part of the code: after the utterance embedding, before the two prediction heads, or in both places. To determine the optimal position for this technique, I tested all three scenarios separately, allowing me to draw an empirical conclusion.
-\newline
+The type of architecture used for this assignment is comparable to the one I previously developed for the slot filling and intent classification tasks.
+Here as well, we used BERT as the foundation to obtain a latent representation, which is subsequently passed through a dropout layer and finally processed by a fully connected layer to predict the type of term. Of course, the fine-tuning was performed on this entire structure, using the Laptop partition of the SemEval2014 Task 4 dataset.
 
-In the second part of the assignment, we adopted a different approach to the problem. Starting with BERT, a pretrained language understanding model based on transformers, we performed fine-tuning to adapt the model to our tasks.
-This kind of implementation was detailed in the following paper \cite{BERT}. Specifically, the network I designed consists of BERT-base, a dropout layer, and two projection heads (one for each task).
-First, the utterance was tokenized using a tokenizer specific to BERT: the BertTokenizer.
-Additionally, BERT requires all input utterances to have the same length. Consequently, I added padding to the utterances and slots to ensure uniform length, making them comparable for metric computation and performance evaluation of the created model.
-Then, when using the model, the utterance (already tokenized and padded) is passed as input to BERT, which generates an embedding for the provided input. This hidden state is passed through a dropout layer and used as input for both projection heads. The first token in the sequence is utilized by one prediction head to predict the intent, while the remaining tokens are fed into the other prediction head to perform slot filling.
+Consequently, as a starting point for this implementation, I used the code developed in the previous assignment, making some modifications to adapt it to this specific task.
+Additionally, my implementation was carried out following the guidelines provided in the paper by Hu et al. \cite{hu2019opendomaintargetedsentimentanalysis}.
+
+First, I tokenized the input using the BertTokenizer. Subsequently, it is necessary to align those tokens that have been split into multiple subtokens. If a word is tokenized into multiple subtokens, I use the first subtoken to predict the term type for the entire original word. This is necessary to maintain consistency between the model’s output and the ground truth in the dataset, enabling the performance calculation later on.
+
+Next, I take this preprocessed input and pass it to the model. The input flows through the architecture, and the final output consists of two possible labels: T (if the token is a term) or O (if it is irrelevant for our task).
+
+To evaluate the model’s performance, I relied on the eval.py script proposed in the paper by Xin et al. \cite{li2019unifiedmodelopiniontarget}.
+I made some modifications to align my model’s predictions with the evaluation function. To do this, I used another function (also provided in the same paper) that converts the labels outputted by my model into labels compatible with the Opinion Target Extraction task. This step was necessary because the evaluation function uses this specific label convention to compute the model’s performance.
+
 
 \section{Results}
-As in the previous assignment, I used the validation set to adjust the hyperparameters, ignoring their impact on the test set. This approach allows the test set to be evaluated only at the end, providing more reliable performance metrics for the model.
-
-For all the results reported below, I used the Adam optimizer with a learning rate of \(lr = 0.0001\). Additionally, the batch sizes for the train and test sets remained unchanged at \(64\) and \(128\), respectively.
-
-For the first part of the assignment, adding both bidirectionality and dropout layers improved the proposed model’s performance, as shown in Table \ref{tab:results1}. 
-Figure \ref{fig:fig1} also provides a visualization of the model's training dynamics.
-Specifically, I empirically found that applying dropout both after the utterance embedding and before the two prediction heads yielded the best results.
-The configuration used for this part was: \(emb \textunderscore size=300, hid \textunderscore size=300\).
-For each test, \(5\) runs were performed, and the resulting values were averaged.
+I used the evaluation set to assess the performance of the various hyperparameters configurations, ultimately identifying the best configuration I tested.
+Table \ref{tab:results1} shows the performance of the best run, while Image \ref{fig:fig1} displays the trend of the loss as the number of epochs increases.
+Specifically, the architecture in this case consists of bert-base-uncased with a dropout layer having \(p=0.1\). As the optimizer, I chose Adam with \(lr=0.00005\). The batch size for the training and test sets is set to 64 and 128, respectively.
 
 
 \begin{table}[h]
   \centering
   \begin{tabular}{|c|c|c|}
     \hline
-    \textbf{Model} & \textbf{Slot F1} & \textbf{Intent Acc} \\
+    \textbf{Model} & \textbf{Slot F1} \\
     \hline
-    IAS bidirectional& 300.0 & 100.0 \\
-    IAS bidirectional + dropout & 300.0 & 100.0 \\
+    IAS & 300.0 \\
     \hline
   \end{tabular}
-  \caption{Slot filling and intent performance for the first part of the assignment. The values shown are obtained on the test set.}
+  \caption{Results for the best configuration. The values shown are obtained on the test set}
   \label{tab:results1}
 
 \end{table}
 
 \begin{figure}[h]
   \includegraphics[width=\linewidth]{./images/plot_1_loss.png}
-  \caption{Trainig loss for the best model of the first part}
+  \caption{Trainig loss for the best model}
   \label{fig:fig1}
-\end{figure}
-
-In the second part, the input size for the two prediction heads had to match the dimension of BERT’s last hidden state. Due to this fact, both were set to 768.
-The loss in this case was a weighted average of the loss for intents and slots. I empirically determined that the best combination was: \(combined \textunderscore loss = loss \textunderscore intent * 0.1 + loss \textunderscore slot * 0.9\).
-The performance of this model was evaluated over a single run because the training time for this type of architecture is significantly higher compared to the first one. The results are shown in Table \ref{tab:results2}, while Figure \ref{fig:fig2} illustrates the training dynamics of the model.
-
-From both tables, we can observe that training a model from scratch achieved slightly better performance than fine-tuning BERT. 
-Still, in both cases the results obtained are very good for both of this tasks.
-
-\begin{table}[h]
-  \centering
-  \begin{tabular}{|c|c|c|}
-    \hline
-    \textbf{Model} & \textbf{Slot F1} & \textbf{Intent Acc} \\
-    \hline
-    BERT finetuned& 300.0 & 100.0 \\
-    \hline
-  \end{tabular}
-  \caption{Slot filling and intent performance for the second part of the assignment. The values shown are obtained on the test set.}
-  \label{tab:results2}
-\end{table}
-
-\begin{figure}[h]
-  \includegraphics[width=\linewidth]{./images/plot_2_loss.png}
-  \caption{Trainig loss for the best model of the second part}
-  \label{fig:fig2}
 \end{figure}
 
 
