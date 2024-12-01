@@ -78,9 +78,9 @@ The training process of the best model is depicted in Figure \ref{fig:fig1}.
 For the second part, starting with the same configuration as before \((hid \textunderscore size=500, out \textunderscore size=600, lr=1.5)\), I modified the layer sizes to use weight tying.
 The model now has \(hid \textunderscore size=out \textunderscore size=600\).
 Regarding Variational Dropout, I tested all four possible combinations for changing the mask: (1) one mask for both layers (fixed); (2) one mask for both layers (changed every epoch); (3) two masks (one per layer, fixed); (4) two masks (one per layer, changed every epoch). The best performance was achieved with the third option: using a different mask for each layer of dropout and changing it every epoch.
-Then I completed the assignment using NT-AvSGD. However this tecnique did not improve the final performance. The training dynamics are shown in Figure \ref{fig:fig2}. As we can see, when switching to NT-aSGD, the loss increases and is no longer able to return to the levels prior to the NT-AvSGD trigger.
-The final results are shown in table \ref{tab:results2}.
-
+Finally, as shown in table \ref{tab:results2}, I completed the assignment using NT-AvSGD.
+The last model switches to AvSGD only in the last few epochs, yet this still enables the model to reach a lower perplexity value.
+In Figure \ref{fig:fig2}, the model's training progression is represented.
 
 \begin{table}[h]
   \centering
@@ -90,7 +90,7 @@ The final results are shown in table \ref{tab:results2}.
     \hline
     W.Tying & 130.78 & 128.35 \\
     W.Tying, Var.Drop. & 129.43 & 125.85 \\
-    W.Tying, Var.Drop., NT-AvSGD & 132.25 & 128.90 \\
+    W.Tying, Var.Drop., NT-AvSGD & 124.56 & 122.22 \\
     \hline
   \end{tabular}
   \caption{Perplexity values for the second part of the assignment}
@@ -100,7 +100,7 @@ The final results are shown in table \ref{tab:results2}.
 
 \begin{figure}[h]
   \includegraphics[width=\linewidth]{./images/plot_2_loss.png}
-  \caption{Trainig loss for the model with NT-AvSGD}
+  \caption{Trainig loss for the best model of the second part}
   \label{fig:fig2}
 \end{figure}
 
