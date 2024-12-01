@@ -21,17 +21,17 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     load_data = LoadData(train_path, dev_path, test_path, device=device)
     lang = load_data.get_lang()
-    train_loader, dev_loader, test_loader = load_data.get_dataset_loaders()
+    train_loader, dev_loader, test_loader = load_data.get_dataset_loaders(batch_size_train=64, batch_size_val=128, batch_size_test=128)
     
     
     
     
     
     #First experiment
-    first_model = LM_LSTM(emb_size=300, hidden_size=300, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"], device=device).to(device)
+    first_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"], device=device).to(device)
     first_model.apply(init_weights)
     
-    optimizer = optim.SGD(first_model.parameters(), lr=2.5)
+    optimizer = optim.SGD(first_model.parameters(), lr=1.5)
     
     first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, experiment_number=1, device=device)
     ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, lang)
@@ -41,10 +41,10 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     
     #Second experiment
-    second_model = LM_LSTM(emb_size=300, hidden_size=300, output_size=len(lang.word2id), variational_dropout=0.1, pad_index=lang.word2id["<pad>"], device=device).to(device)
+    second_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), variational_dropout=0.05, pad_index=lang.word2id["<pad>"], device=device).to(device)
     second_model.apply(init_weights)
     
-    optimizer = optim.SGD(second_model.parameters(), lr=2.5)
+    optimizer = optim.SGD(second_model.parameters(), lr=1.5)
     
     second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, experiment_number=2, device=device)
     ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, lang)
@@ -54,10 +54,10 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     
     #Third experiment
-    third_model = LM_LSTM(emb_size=300, hidden_size=300, output_size=len(lang.word2id), variational_dropout=0.1, pad_index=lang.word2id["<pad>"], device=device).to(device)
+    third_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), variational_dropout=0.05, pad_index=lang.word2id["<pad>"], device=device).to(device)
     third_model.apply(init_weights)
     
-    optimizer = optim.SGD(third_model.parameters(), lr=2.5)
+    optimizer = optim.SGD(third_model.parameters(), lr=1.5)
     
     third_trained_model = execute_experiment(third_model, train_loader, dev_loader, optimizer, lang, experiment_number=3, nonmono_ASGD=True, ASGD_lr=2.5, device=device)
     ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(third_trained_model, train_loader, dev_loader, test_loader, lang)

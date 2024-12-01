@@ -6,8 +6,7 @@
 \title{NLU course projects lab 4: LM}
 \name{Nicola Muraro (248449)}
 
-\address{
-  University of Trento}
+\address{University of Trento}
 \email{nicola.muraro@studenti.unitn.it}
 
 \begin{document}
@@ -18,7 +17,7 @@
 The purpose of this assignment is to implement a language model based on neural architectures.
 Specifically, the task of this model is to predict the next token given a set of tokens, referred to as the context.
 To achieve this goal, I used an LSTM on which several modifications were made to improve its performance. 
-In the first part of the assignment, various optimisers were analysed alongside the use of dropout. In the second part, instead I implemented more sophisticated regularisation techniques described in this article \cite{merity2017regularizing}.
+In the first part of the assignment, various optimisers were analysed alongside the use of dropout. In the second part, instead I implemented more sophisticated regularisation techniques described in the article written by Merity et al. \cite{merity2017regularizing}.
 This report briefly summarises the studies conducted and the results.
 
 \section{Implementation details}
@@ -29,7 +28,7 @@ I started by replacing the original architecture (based on RNN) with LSTM to est
 Next, I made the first modification by adding dropout layers: one after the embedding layer and another before the output layer. In both cases, the most effective dropout value was 0.1.
 Finally, I implemented the last required modification by replacing SGD with AdamW. Since changing the optimiser also requires adjusting the learning rate, I made the necessary adjustments to the learning rate to ensure an optimal performance.
 
-The second part involves starting from the initial network (LSTM with SGD) and incrementally applying regularisation techniques outlined in this article \cite{merity2017regularizing}.
+The second part involves starting from the initial network (LSTM with SGD) and incrementally applying regularisation techniques outlined by Merity et al. \cite{merity2017regularizing}.
 First, I implemented weight tying between the embedding layer and the output layer.
 This technique allows multiple layers in the network to share the same weights, aiming to regularise the entire architecture.
 To enable weight sharing, the layers involved must have the same dimensions, so I adjusted their sizes to ensure compatibility.
@@ -44,13 +43,14 @@ Since the timing of this switch is not predetermined, this technique is expected
 \section{Results}
 The results used to evaluate the effectiveness of the implemented techniques were obtained using the evaluation set. This approach ensures better generalisation. Using the evaluation set to fine-tune hyper-parameters and find an optimal configuration allows for more reliable results on the test set.
 In general, the best machine learning models have high capacity and are properly regularised. Since many of the previously applied techniques are forms of regularisation, I started with a relatively large model.
-For all configurations, the batch size was kept constant at 64.
+For all configurations, the batch size for the training segment was kept constant at 64, while for the evaluation it was set at 128.
 
 
-In the first part, the initial model was created with the following specifications: \(hid \textunderscore size=500, out \textunderscore size=600, lr=1.5\).
-The use of dropout yielded better results with a probability of \(p=0.2\). Finally, after replacing the optimizer with AdamW, I adjusted the learning rate to 0.0001.
-As we can see from the results shown in table \ref{tab:results1}, all the modifications led to improved performance. Therefore, they were all kept in the final configuration.
-The training process of the model is depicted in Figure \ref{fig:fig1}.
+In the first part, the initial model was created with the following specifications: \(hid \textunderscore size=600, out \textunderscore size=600, lr=1.5\).
+The use of dropout yielded better results with a probability of \(p=0.3\). Finally, after replacing the optimizer with AdamW, I adjusted the learning rate to 0.0005.
+As we can see from the results shown in table \ref{tab:results1}, only the first two modifications led to improved performance. 
+We can observe that the addition of AdamW does not result in an improvement in performance on the validation set. However, it leads to an improvement on the test set. This might suggest better generalization by this optimizer, but not consistently across both datasets. Consequently, as it does not improve the values on the validation set, this modification was disregarded in the final model. For optimal generalization we cannot implement a modification based solely on its performance on the test set, since we generally would not have access to such data.
+The training process of the best model is depicted in Figure \ref{fig:fig1}.
 
 \begin{table}[h]
   \centering
@@ -58,9 +58,9 @@ The training process of the model is depicted in Figure \ref{fig:fig1}.
     \hline
     \textbf{Model} & \textbf{Eval PPL} & \textbf{Test PPL} \\
     \hline
-    LSTM & 300.0 & 100.0 \\
-    LSTM with dropout & 300.0 & 100.0 \\
-    LSTM with dropout, AdamW & 300.0 & 100.0 \\
+    LSTM & 144.09 & 139.51 \\
+    LSTM with dropout & 115.45 & 111.07 \\
+    LSTM with dropout, AdamW & 119.01 & 109.17\\
     \hline
   \end{tabular}
   \caption{Perplexity values for the first part of the assignment}
@@ -78,8 +78,9 @@ The training process of the model is depicted in Figure \ref{fig:fig1}.
 For the second part, starting with the same configuration as before \((hid \textunderscore size=500, out \textunderscore size=600, lr=1.5)\), I modified the layer sizes to use weight tying.
 The model now has \(hid \textunderscore size=out \textunderscore size=600\).
 Regarding Variational Dropout, I tested all four possible combinations for changing the mask: (1) one mask for both layers (fixed); (2) one mask for both layers (changed every epoch); (3) two masks (one per layer, fixed); (4) two masks (one per layer, changed every epoch). The best performance was achieved with the third option: using a different mask for each layer of dropout and changing it every epoch.
-Finally, as shown in table \ref{tab:results2}, I completed the assignment using NT-AvSGD, which resulted in the best performance.
-In Figure \ref{fig:fig2}, the model's training progression is represented.
+Then I completed the assignment using NT-AvSGD. However this tecnique did not improve the final performance. The training dynamics are shown in Figure \ref{fig:fig2}. As we can see, when switching to NT-aSGD, the loss increases and is no longer able to return to the levels prior to the NT-AvSGD trigger.
+The final results are shown in table \ref{tab:results2}.
+
 
 \begin{table}[h]
   \centering
@@ -87,9 +88,9 @@ In Figure \ref{fig:fig2}, the model's training progression is represented.
     \hline
     \textbf{Tecnique} & \textbf{Eval PPL} & \textbf{Test PPL} \\
     \hline
-    W.Tying & 300.0 & 100.0 \\
-    W.Tying, Var.Drop. & 300.0 & 100.0 \\
-    W.Tying, Var.Drop., NT-AvSGD & 300.0 & 100.0 \\
+    W.Tying & 130.78 & 128.35 \\
+    W.Tying, Var.Drop. & 129.43 & 125.85 \\
+    W.Tying, Var.Drop., NT-AvSGD & 132.25 & 128.90 \\
     \hline
   \end{tabular}
   \caption{Perplexity values for the second part of the assignment}
@@ -99,7 +100,7 @@ In Figure \ref{fig:fig2}, the model's training progression is represented.
 
 \begin{figure}[h]
   \includegraphics[width=\linewidth]{./images/plot_2_loss.png}
-  \caption{Trainig loss for the best model of the second part}
+  \caption{Trainig loss for the model with NT-AvSGD}
   \label{fig:fig2}
 \end{figure}
 
