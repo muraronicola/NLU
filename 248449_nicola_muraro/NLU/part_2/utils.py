@@ -9,7 +9,7 @@ from collections import Counter
 
 class LoadData():
     
-    def __init__(self, train_path, test_path, tokenizer, device="cpu", pad_token=0):
+    def __init__(self, train_path, test_path, tokenizer, device="cpu", pad_token=0, lang=None):
         self.__device = device
         self.__pad_token = pad_token
         
@@ -18,8 +18,13 @@ class LoadData():
         __original_train_raw_file = self.__read_file(train_path)
         self.__train_raw, self.__dev_raw = self.__createDevSet(__original_train_raw_file)
         
-        __tokens, __corpus, __intents, __slots = self.__createDatasetInformation(self.__train_raw, self.__dev_raw, self.__test_raw, tokenizer)
-        self.__lang = Lang(__tokens, __intents, __slots, tokenizer, pad_token, cutoff=0)
+
+        if lang is not None:
+            self.__lang = lang
+        else:
+            __tokens, __corpus, __intents, __slots = self.__createDatasetInformation(self.__train_raw, self.__dev_raw, self.__test_raw, tokenizer)
+            self.__lang = Lang(__tokens, __intents, __slots, tokenizer, pad_token, cutoff=0)
+        
         
         self.__train_dataset = IntentsAndSlots(self.__train_raw, self.__lang, tokenizer, self.__pad_token)
         self.__dev_dataset = IntentsAndSlots(self.__dev_raw, self.__lang, tokenizer, self.__pad_token)

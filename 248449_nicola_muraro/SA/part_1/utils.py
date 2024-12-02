@@ -10,7 +10,7 @@ import nltk
 
 class LoadData():
     
-    def __init__(self, train_path, test_path, tokenizer, device="cpu", pad_token=0):
+    def __init__(self, train_path, test_path, tokenizer, device="cpu", pad_token=0, lang=None):
         self.__device = device
         self.__pad_token = pad_token
         
@@ -22,8 +22,11 @@ class LoadData():
         
         __tokenized_train, __tokenized_dev = self.__createDevSet(__tmp_tokenized_raw_train)
         
-        __tokens, __corpus, __slots = self.__createDatasetInformation(__tokenized_train, __tokenized_dev, __tokenized_test, tokenizer)
-        self.__lang = Lang(__tokens, __slots, tokenizer, pad_token, cutoff=0)
+        if lang is not None:
+            self.__lang = lang
+        else:
+            __tokens, __corpus, __slots = self.__createDatasetInformation(__tokenized_train, __tokenized_dev, __tokenized_test, tokenizer)
+            self.__lang = Lang(__tokens, __slots, tokenizer, pad_token, cutoff=0)
         
         self.__train_dataset = Slots(__tokenized_train, self.__lang, tokenizer, self.__pad_token)
         self.__dev_dataset = Slots(__tokenized_dev, self.__lang, tokenizer, self.__pad_token)

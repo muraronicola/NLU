@@ -6,7 +6,7 @@ from tqdm import tqdm
 import os
 
 def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experiment_number, device="cpu", n_epochs=100, clip=5):
-    print("Starting experiment " + str(experiment_number) + "...\n")
+    print("Starting experiment " + str(experiment_number) + "...\n")/Users/nicolamuraro/Desktop/NLU/SELECTED_RESULTS/all_data/Ass_2/part1/script_2_part_1_2__300_300_0.0001_64_0.3_3.pt
     
     criterion_train = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"])
     criterion_eval = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"], reduction='sum')

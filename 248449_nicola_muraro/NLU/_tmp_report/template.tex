@@ -41,7 +41,7 @@ For all the results reported below, I used the Adam optimizer with a learning ra
 For the first part of the assignment, adding both bidirectionality and dropout layers improved the proposed model’s performance, as shown in Table \ref{tab:results1}. 
 Figure \ref{fig:fig1} also provides a visualization of the model's training dynamics. From there we can observe that the model behaves well, with a clear decreasing trend in the loss function on both sets of data.
 Specifically, I empirically found that applying dropout both after the utterance embedding and before the two prediction heads yielded the best results.
-The configuration used for this part was: \(emb \textunderscore size=300, hid \textunderscore size=300\).
+The configuration used for this part was: \(emb \textunderscore size=300, hid \textunderscore size=200\).
 For each test, \(5\) runs were performed, and the resulting values were averaged.
 
 

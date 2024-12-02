@@ -9,16 +9,20 @@ from collections import Counter
 
 class LoadData():
     
-    def __init__(self, train_path, test_path, device="cpu", pad_token=0):
+    def __init__(self, train_path, test_path, device="cpu", pad_token=0, lang=None):
         self.__test_raw = self.__read_file(test_path)
         
         __original_train_raw_file = self.__read_file(train_path)
         self.__train_raw, self.__dev_raw = self.__createDevSet(__original_train_raw_file)
         
         
-        __words, __corpus, __intents, __slots = self.__createDatasetInformation(self.__train_raw, self.__dev_raw, self.__test_raw)
-        self.__lang = Lang(__words, __intents, __slots, pad_token, cutoff=0)
         
+        if lang is not None:
+            self.__lang = lang
+        else:
+            __words, __corpus, __intents, __slots = self.__createDatasetInformation(self.__train_raw, self.__dev_raw, self.__test_raw)
+            self.__lang = Lang(__words, __intents, __slots, pad_token, cutoff=0)
+            
         
         self.__train_dataset = IntentsAndSlots(self.__train_raw, self.__lang)
         self.__dev_dataset = IntentsAndSlots(self.__dev_raw, self.__lang)

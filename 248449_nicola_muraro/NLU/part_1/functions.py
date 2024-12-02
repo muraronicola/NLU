@@ -9,6 +9,7 @@ import numpy as np
 from torch import optim
 from sklearn.metrics import classification_report
 import re
+import os
 
 def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device="cpu", n_epochs=200, clip=5):  #default: n_epochs=200
     
@@ -44,8 +45,8 @@ def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_
     return results_train, results_dev, results_test, intent_train, intent_dev, intent_test, loss_train, loss_dev, loss_test
 
 
-def print_results(experiment_number, intent_acc, slot_f1s):
-    print("\nResults of experiment " + str(experiment_number) + ":")
+def print_results(intent_acc, slot_f1s, title=""):
+    print("\n" + title)
     
     slot_f1s = np.asarray(slot_f1s)
     intent_acc = np.asarray(intent_acc)
@@ -149,7 +150,64 @@ def init_weights(mat):
                 torch.nn.init.uniform_(m.weight, -0.01, 0.01)
                 if m.bias != None:
                     m.bias.data.fill_(0.01)
-                    
+
+
+
+def final_result_summary(summary_results): #print and return the best model
+    best_model = min(summary_results, key=lambda x: x[2])
+    print("")
+    print("-"*50)
+    print("-"*50)
+    print(f"\nThe best model is the {best_model[0]}, with a dev slot f1 of {best_model[2]}\n")
+    print("-"*50)
+    print("-"*50)
+    return best_model
+
+
+def save_best_model(best_model, lang, path="./bin/"):
+    base_filename = "best_model_"
+    extension= ".pt"
+    new_file = False
+    complete_filename = ""
+    counter = 0
+    
+    while not new_file: #Check if the file already exists, if so, generate a new filename
+        id = str(counter)
+        complete_filename = base_filename + id + extension
+        
+        if not os.path.exists(f"{path}{complete_filename}"):
+            new_file = True
+            
+        counter+=1
+        
+    saving_object = {"state_dict": best_model.state_dict(), "lang": lang}
+    torch.save(saving_object, f"{path}{complete_filename}") #Save the best model to the bin folder
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def stats():
     return {'cor': 0, 'hyp': 0, 'ref': 0}
