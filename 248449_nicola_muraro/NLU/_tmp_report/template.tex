@@ -39,7 +39,7 @@ As in the previous assignment, I used the validation set to adjust the hyperpara
 For all the results reported below, I used the Adam optimizer with a learning rate of \(lr = 0.0001\). Additionally, the batch sizes for the train and test sets remained unchanged at \(64\) and \(128\), respectively.
 
 For the first part of the assignment, adding both bidirectionality and dropout layers improved the proposed model’s performance, as shown in Table \ref{tab:results1}. 
-Figure \ref{fig:fig1} also provides a visualization of the model's training dynamics.
+Figure \ref{fig:fig1} also provides a visualization of the model's training dynamics. From there we can observe that the model behaves well, with a clear decreasing trend in the loss function on both sets of data.
 Specifically, I empirically found that applying dropout both after the utterance embedding and before the two prediction heads yielded the best results.
 The configuration used for this part was: \(emb \textunderscore size=300, hid \textunderscore size=300\).
 For each test, \(5\) runs were performed, and the resulting values were averaged.
@@ -51,11 +51,11 @@ For each test, \(5\) runs were performed, and the resulting values were averaged
     \hline
     \textbf{Model} & \textbf{Slot F1} & \textbf{Intent Acc} \\
     \hline
-    IAS bidirectional& 300.0 & 100.0 \\
-    IAS bidirectional + dropout & 300.0 & 100.0 \\
+    IAS bidir.&  0.935 +- 0.002 & 0.940 +- 0.004 \\
+    IAS bidir. + dropout & 0.940 +- 0.002 & 0.953 +- 0.005 \\
     \hline
   \end{tabular}
-  \caption{Slot filling and intent performance for the first part of the assignment. The values shown are obtained on the test set.}
+  \caption{Slot filling and intent performance for the first part of the assignment. The values shown are obtained by an average of 5 runs on the test set.}
   \label{tab:results1}
 
 \end{table}
@@ -67,10 +67,11 @@ For each test, \(5\) runs were performed, and the resulting values were averaged
 \end{figure}
 
 In the second part, the input size for the two prediction heads had to match the dimension of BERT’s last hidden state. Due to this fact, both were set to 768.
-The loss in this case was a weighted average of the loss for intents and slots. I empirically determined that the best combination was: \(combined \textunderscore loss = loss \textunderscore intent * 0.1 + loss \textunderscore slot * 0.9\).
+The loss also in this case was a weighted average of the loss for intents and slots. I empirically determined that the best combination was: \(combined \textunderscore loss = loss \textunderscore intent * 0.1 + loss \textunderscore slot * 0.9\).
 The performance of this model was evaluated over a single run because the training time for this type of architecture is significantly higher compared to the first one. The results are shown in Table \ref{tab:results2}, while Figure \ref{fig:fig2} illustrates the training dynamics of the model.
+As we can see, in the beginning of the train the loss is very high, but after a few epochs it starts to decrease rapidly. This is probably due to the fact that the backbone needs some time to adapt to the new tasks, and then it starts to perform well.
 
-From both tables, we can observe that training a model from scratch achieved slightly better performance than fine-tuning BERT. 
+From both tables, we can observe that training a model from scratch achieved slightly better performance than fine-tuning BERT on the slot filling task. Instead, on the intent classification task, the second model is slightly better. 
 Still, in both cases the results obtained are very good for both of this tasks.
 
 \begin{table}[h]
@@ -79,10 +80,10 @@ Still, in both cases the results obtained are very good for both of this tasks.
     \hline
     \textbf{Model} & \textbf{Slot F1} & \textbf{Intent Acc} \\
     \hline
-    BERT finetuned& 300.0 & 100.0 \\
+    BERT finetuned& 0.927 & 0.967 \\
     \hline
   \end{tabular}
-  \caption{Slot filling and intent performance for the second part of the assignment. The values shown are obtained on the test set.}
+  \caption{Slot filling and intent performance for the second part of the assignment. The values shown are obtained in a single run on the test set.}
   \label{tab:results2}
 \end{table}
 
