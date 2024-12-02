@@ -1,11 +1,10 @@
-# Add the class of your model only
-# Here is where you define the architecture of your model using pytorch
 import torch
 import torch.nn as nn
 import math
 import copy
 from tqdm import tqdm
 import numpy as np
+import os
 from torch import optim
 
 def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experiment_number, device="cpu", n_epochs=100, clip=5, ASGD_lr=2.5, n_nonmono=5, nonmono_ASGD=False):
@@ -24,25 +23,41 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experim
         loss = train_loop(train_loader, optimizer, criterion_train, model, clip)    
         
         if epoch % 1 == 0:
-            ppl_dev, loss_dev = eval_loop(dev_loader, criterion_eval, model)
+            if 't0' in optimizer.param_groups[0]:
+                tmp = {}
+                for prm in model.parameters():
+                    tmp[prm] = prm.data.clone()
+                    prm.data = optimizer.state[prm]['ax'].clone()
+
+                ppl_dev, loss_dev = eval_loop(dev_loader, criterion_eval, model)
+                maybe_best_model = copy.deepcopy(model).to('cpu')
+                
+                for prm in model.parameters():
+                    prm.data = tmp[prm].clone()
+                
+            else:
+                ppl_dev, loss_dev = eval_loop(dev_loader, criterion_eval, model)
+                maybe_best_model = copy.deepcopy(model).to('cpu')
+
+                if nonmono_ASGD: # If the flag is set, we will enable the possibility to use ASGD
+                    if 't0' not in optimizer.param_groups[0] and (len(losses_dev)>n_nonmono and loss_dev > min(losses_dev[:-n_nonmono])):
+                        patience = 10
+                        print("Now using ASGD, epoch", epoch)
+                        optimizer = optim.ASGD(model.parameters(), lr=ASGD_lr, t0=0, lambd=0, weight_decay=0)
+            
+            
+            losses_dev.append(np.asarray(loss_dev).mean())
             pbar.set_description("PPL: %f" % ppl_dev)
             
             if  ppl_dev < best_ppl: # the lower, the better
                 best_ppl = ppl_dev
-                best_model = copy.deepcopy(model).to('cpu')
+                best_model = copy.deepcopy(maybe_best_model).to('cpu')
                 patience = 3
             else:
                 patience -= 1
                 
             if patience <= 0: # Early stopping with patience
                 break # Not nice but it keeps the code clean
-            
-            if nonmono_ASGD:
-                if optimizer.__class__.__name__ == 'SGD' and (len(losses_dev)>n_nonmono and loss_dev > min(losses_dev[:-n_nonmono])):
-                    #print("Now using ASGD")
-                    optimizer = optim.ASGD(model.parameters(), lr=ASGD_lr, t0=0, lambd=0, weight_decay=0)
-                
-                losses_dev.append(np.asarray(loss_dev).mean())
             
         
         model.changeDropoutMask()
@@ -59,8 +74,8 @@ def evaluate_experiment(model, train_loader, dev_loader, test_loader, lang):
     return ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test
 
 
-def print_results(experiment_number, ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test):
-    print("\nResults of experiment " + str(experiment_number) + ":")
+def print_results(ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test, title=""):
+    print("\n" + title)
     print("Train:\tPPL "+ str(round(ppl_train, 2))+"\tloss "+str(round(loss_train, 2)))
     print("Dev:\tPPL "+ str(round(ppl_dev, 2))+"\tloss "+str(round(loss_dev, 2)))
     print("Test:\tPPL "+ str(round(ppl_test, 2))+"\tloss "+str(round(loss_test, 2)))
@@ -126,3 +141,33 @@ def init_weights(mat):
                 torch.nn.init.uniform_(m.weight, -0.01, 0.01)
                 if m.bias != None:
                     m.bias.data.fill_(0.01)
+                    
+
+def final_result_summary(summary_results): #print and return the best model
+    best_model = min(summary_results, key=lambda x: x[2])
+    print("")
+    print("-"*50)
+    print("-"*50)
+    print(f"\nThe best model is the {best_model[0]}, with a dev PPL of {best_model[2]}\n")
+    print("-"*50)
+    print("-"*50)
+    return best_model
+
+def save_best_model(best_model, lang, path="./bin/"):
+    base_filename = "best_model_"
+    extension= ".pt"
+    new_file = False
+    complete_filename = ""
+    counter = 0
+    
+    while not new_file: #Check if the file already exists, if so, generate a new filename
+        id = str(counter)
+        complete_filename = base_filename + id + extension
+        
+        if not os.path.exists(f"./bin/{complete_filename}"):
+            new_file = True
+            
+        counter+=1
+        
+    saving_object = {"model": best_model, "lang": lang}
+    torch.save(saving_object, f"./bin/{complete_filename}") #Save the best model to the bin folders

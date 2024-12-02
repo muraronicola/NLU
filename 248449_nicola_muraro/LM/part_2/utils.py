@@ -1,4 +1,3 @@
-# Add functions or classes used for data loading and preprocessing
 from torch.utils.data import Dataset, DataLoader
 import torch.utils.data as data
 from functools import partial
@@ -60,7 +59,7 @@ class Lang():
 
 
 
-class PennTreeBank (data.Dataset):    #Serve? Mi sa di si
+class PennTreeBank (data.Dataset):
     # Mandatory methods are __init__, __len__ and __getitem__
     def __init__(self, corpus, lang):
         self.source = []
