@@ -36,7 +36,7 @@ if __name__ == "__main__":
         lang = load_data.get_lang() #Get the lang object
         
         #First experiment
-        first_model = LM_LSTM(emb_size=500, hidden_size=600, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"]).to(device)
+        first_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"]).to(device)
         first_model.apply(init_weights)
         
         optimizer = optim.SGD(first_model.parameters(), lr=1.5)
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         
         
         #Second experiment
-        second_model = LM_LSTM(emb_size=500, hidden_size=600, output_size=len(lang.word2id), emb_dropout=0.3, out_dropout=0.3, pad_index=lang.word2id["<pad>"]).to(device)
+        second_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.3, out_dropout=0.3, pad_index=lang.word2id["<pad>"]).to(device)
         second_model.apply(init_weights)
         
         optimizer = optim.SGD(second_model.parameters(), lr=1.5)
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         
         
         #Third experiment
-        third_model = LM_LSTM(emb_size=500, hidden_size=600, output_size=len(lang.word2id), emb_dropout=0.1, out_dropout=0.1, pad_index=lang.word2id["<pad>"]).to(device)
+        third_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.1, out_dropout=0.1, pad_index=lang.word2id["<pad>"]).to(device)
         third_model.apply(init_weights)
         
         optimizer = optim.AdamW(third_model.parameters(), lr=0.0005)
@@ -81,10 +81,18 @@ if __name__ == "__main__":
     
     
     else: #Evaluating only the best model (loaded from the model_path_eval)
-        loaded_object = torch.load(model_path_eval)
-        best_model = loaded_object["model"] #Get the model object
-        lang = loaded_object["lang"] #Get the lang object
+        saved_dictionary = torch.load(model_path_eval)
+        
+        lang = saved_dictionary["lang"] #Get the lang object
+        best_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.3, out_dropout=0.3, pad_index=lang.word2id["<pad>"])
+        best_model.load_state_dict(torch.load(saved_dictionary["state_dict"]))
         
         best_model.to(device)
         ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, lang)
         print_results(ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test, title="Results of the best save model:")
+        
+        
+        #state_dict = best_model.state_dict()
+        
+        #to_save = {"state_dict": state_dict, "lang": lang}
+        #torch.save(to_save, "./bin/best_model_state_dict.pt")

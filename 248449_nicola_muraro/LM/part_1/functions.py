@@ -142,5 +142,5 @@ def save_best_model(best_model, lang, path="./bin/"):
             
         counter+=1
         
-    saving_object = {"model": best_model, "lang": lang}
+    saving_object = {"state_dict": best_model.state_dict(), "lang": lang}
     torch.save(saving_object, f"{path}{complete_filename}") #Save the best model to the bin folder
