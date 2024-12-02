@@ -81,18 +81,13 @@ if __name__ == "__main__":
     
     
     else: #Evaluating only the best model (loaded from the model_path_eval)
-        saved_dictionary = torch.load(model_path_eval)
+        saved_info = torch.load(model_path_eval)
+        state_dict = saved_info["state_dict"]
+        lang = saved_info["lang"]
         
-        lang = saved_dictionary["lang"] #Get the lang object
         best_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.3, out_dropout=0.3, pad_index=lang.word2id["<pad>"])
-        best_model.load_state_dict(torch.load(saved_dictionary["state_dict"]))
-        
+        best_model.load_state_dict(state_dict)
         best_model.to(device)
+
         ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, lang)
         print_results(ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test, title="Results of the best save model:")
-        
-        
-        #state_dict = best_model.state_dict()
-        
-        #to_save = {"state_dict": state_dict, "lang": lang}
-        #torch.save(to_save, "./bin/best_model_state_dict.pt")

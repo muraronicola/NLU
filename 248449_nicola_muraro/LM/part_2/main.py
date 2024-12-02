@@ -82,10 +82,13 @@ if __name__ == "__main__":
     
     
     else: #Evaluating only the best model (loaded from the model_path_eval)
-        loaded_object = torch.load(model_path_eval)
-        best_model = loaded_object["model"] #Get the model object
-        lang = loaded_object["lang"] #Get the lang object
+        saved_info = torch.load(model_path_eval)
+        state_dict = saved_info["state_dict"]
+        lang = saved_info["lang"]
         
+        best_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), variational_dropout=0.05, pad_index=lang.word2id["<pad>"], device=device)
+        best_model.load_state_dict(state_dict)
         best_model.to(device)
+
         ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, lang)
         print_results(ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test, title="Results of the best save model:")

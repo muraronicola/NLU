@@ -164,10 +164,10 @@ def save_best_model(best_model, lang, path="./bin/"):
         id = str(counter)
         complete_filename = base_filename + id + extension
         
-        if not os.path.exists(f"./bin/{complete_filename}"):
+        if not os.path.exists(f"{path}{complete_filename}"):
             new_file = True
             
         counter+=1
         
-    saving_object = {"model": best_model, "lang": lang}
-    torch.save(saving_object, f"./bin/{complete_filename}") #Save the best model to the bin folders
+    saving_object = {"state_dict": best_model.state_dict(), "lang": lang}
+    torch.save(saving_object, f"{path}{complete_filename}") #Save the best model to the bin folders
