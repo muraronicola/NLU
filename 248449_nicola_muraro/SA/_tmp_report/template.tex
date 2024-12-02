@@ -37,7 +37,10 @@ I made some modifications to align my model’s predictions with the evaluation 
 \section{Results}
 I used the evaluation set to assess the performance of the various hyperparameters configurations, ultimately identifying the best configuration I tested.
 Table \ref{tab:results1} shows the performance of the best run, while Image \ref{fig:fig1} displays the trend of the loss as the number of epochs increases.
-Specifically, the architecture in this case consists of bert-base-uncased with a dropout layer having \(p=0.1\). As the optimizer, I chose Adam with \(lr=0.00005\). The batch size for the training and test sets is set to 64 and 128, respectively.
+We can see that in very few epochs, the model reaches a good performance, after that the loss starts to increase, indicating that the model is overfitting the training set very rapidly.
+I set the patience parameter to an high number (\(patient=10\)), too see if the model could start again to improove its performance, but it didn't happen.
+
+The best architecture in this case consists of bert-base-uncased with a dropout layer having \(p=0.1\). As the optimizer, I chose Adam with \(lr=0.00005\). The batch size for the training and test sets is set to 64 and 128, respectively.
 
 
 \begin{table}[h]
@@ -46,7 +49,7 @@ Specifically, the architecture in this case consists of bert-base-uncased with a
     \hline
     \textbf{Model} & \textbf{Slot F1} \\
     \hline
-    IAS & 300.0 \\
+    IAS & 60.922 \\
     \hline
   \end{tabular}
   \caption{Results for the best configuration. The values shown are obtained on the test set}
@@ -56,7 +59,7 @@ Specifically, the architecture in this case consists of bert-base-uncased with a
 
 \begin{figure}[h]
   \includegraphics[width=\linewidth]{./images/plot_1_loss.png}
-  \caption{Trainig loss for the best model}
+  \caption{Trainig loss for the best model. As we can see, the model starts to overfit very rapidly. The best value for the eval set is reached only after 7 epochs.}
   \label{fig:fig1}
 \end{figure}
 
