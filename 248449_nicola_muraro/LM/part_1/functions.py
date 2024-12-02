@@ -6,7 +6,7 @@ import math
 import copy
 from tqdm import tqdm
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experiment_number, device="cpu", n_epochs=2, clip=5):  #default: n_epochs=100
+def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experiment_number, device="cpu", n_epochs=100, clip=5):
     print("Starting experiment " + str(experiment_number) + "...\n")
     
     criterion_train = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"])

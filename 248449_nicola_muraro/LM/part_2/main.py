@@ -1,17 +1,24 @@
-# This file is used to run your functions and print the results
-# Please write your fuctions or classes in the functions.py
-
-# Import everything from functions.py file
 from functions import *
 from utils import LoadData
 from model import LM_LSTM
 from torch import optim
+import argparse
+import os
 
-if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
-    #Write the code to load the datasets and to run your functions
-    # Print the results
+if __name__ == "__main__":
     
-    device = "cuda:0"
+    #Parse the arguments from the console
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--device", type=str, help = "The device on which run the model", default="cuda:0")
+    parser.add_argument("-s", "--save", type=bool, help = "Save the best model", default=False)
+    parser.add_argument("-e", "--eval_only", type=bool, help = "Whether to evaluate only the best model, without training anything", default=False)
+    parser.add_argument("-m", "--model", type=str, help = "The model path to be evaluated (used only with eval_only)", default="./bin/best_model.pt")
+    
+    args = parser.parse_args()
+    eval_only = args.eval_only
+    device = args.device
+    save_model = args.save
+    model_path_eval = args.model
     
     
     #Load the dataset
@@ -20,45 +27,87 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     test_path = "./dataset/ptb.test.txt"
     
     load_data = LoadData(train_path, dev_path, test_path, device=device)
-    lang = load_data.get_lang()
     train_loader, dev_loader, test_loader = load_data.get_dataset_loaders(batch_size_train=64, batch_size_val=128, batch_size_test=128)
     
     
     
     
     
-    #First experiment
-    first_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"], device=device).to(device)
-    first_model.apply(init_weights)
+    if not eval_only: #Train the models and evaluate all of them
+        lang = load_data.get_lang() #Get the lang object
+        
+        #First experiment
+        first_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"], device=device).to(device)
+        first_model.apply(init_weights)
+        
+        optimizer = optim.SGD(first_model.parameters(), lr=1.5)
+        
+        first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, experiment_number=1, device=device)
+        ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, lang)
+        print_results(1, ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test)
     
-    optimizer = optim.SGD(first_model.parameters(), lr=1.5)
+
+        #Second experiment
+        second_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), variational_dropout=0.05, pad_index=lang.word2id["<pad>"], device=device).to(device)
+        second_model.apply(init_weights)
+        
+        optimizer = optim.SGD(second_model.parameters(), lr=1.5)
+        
+        second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, experiment_number=2, device=device)
+        ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, lang)
+        print_results(2, ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test)
+        
+        
+        #Third experiment
+        third_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), variational_dropout=0.05, pad_index=lang.word2id["<pad>"], device=device).to(device)
+        third_model.apply(init_weights)
+        
+        optimizer = optim.SGD(third_model.parameters(), lr=1.5)
+        
+        third_trained_model = execute_experiment(third_model, train_loader, dev_loader, optimizer, lang, experiment_number=3, nonmono_ASGD=True, ASGD_lr=2.5, device=device)
+        ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(third_trained_model, train_loader, dev_loader, test_loader, lang)
+        print_results(3, ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test)
+        
+        
+        
+        
+        
+        #Print the best model
+        global_results = zip(("first model", "second model", "third model"), (first_trained_model, second_trained_model, third_trained_model), (ppl_dev_1, ppl_dev_2, ppl_dev_3))
+        best_model = min(global_results, key=lambda x: x[2])
+        print("")
+        print("-"*50)
+        print("-"*50)
+        print(f"\nThe best model is the {best_model[0]}, wiht a PPL of {best_model[2]}\n")
+        print("-"*50)
+        print("-"*50)
+        
+        if save_model: #Saving the best model to ./bin folder
+            base_filename = "best_model_"
+            extension= ".pt"
+            new_file = False
+            complete_filename = ""
+            counter = 0
+            
+            while not new_file: #Check if the file already exists, if so, generate a new filename
+                id = str(counter)
+                complete_filename = base_filename + id + extension
+                
+                if not os.path.exists(f"./bin/{complete_filename}"):
+                    new_file = True
+                    
+                counter+=1
+                
+            saving_object = {"model": best_model[1], "lang": lang}
+            torch.save(saving_object, f"./bin/{complete_filename}") #Save the best model to the bin folder
     
-    first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, experiment_number=1, device=device)
-    ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, lang)
-    print_results(1, ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test)
     
-    
-    
-    
-    #Second experiment
-    second_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), variational_dropout=0.05, pad_index=lang.word2id["<pad>"], device=device).to(device)
-    second_model.apply(init_weights)
-    
-    optimizer = optim.SGD(second_model.parameters(), lr=1.5)
-    
-    second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, experiment_number=2, device=device)
-    ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, lang)
-    print_results(2, ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test)
-    
-    
-    
-    
-    #Third experiment
-    third_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), variational_dropout=0.05, pad_index=lang.word2id["<pad>"], device=device).to(device)
-    third_model.apply(init_weights)
-    
-    optimizer = optim.SGD(third_model.parameters(), lr=1.5)
-    
-    third_trained_model = execute_experiment(third_model, train_loader, dev_loader, optimizer, lang, experiment_number=3, nonmono_ASGD=True, ASGD_lr=2.5, device=device)
-    ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(third_trained_model, train_loader, dev_loader, test_loader, lang)
-    print_results(3, ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test)
+    else: #Evaluating only the best model (loaded from the model_path_eval)
+
+        loaded_object = torch.load(model_path_eval)
+        best_model = loaded_object["model"] #Get the model object
+        lang = loaded_object["lang"] #Get the lang object
+        
+        best_model.to(device)
+        ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, lang)
+        print_results("", ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test)

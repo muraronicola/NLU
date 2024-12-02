@@ -8,7 +8,7 @@ from tqdm import tqdm
 import numpy as np
 from torch import optim
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experiment_number, device="cpu", n_epochs=2, clip=5, ASGD_lr=2.5, n_nonmono=5, nonmono_ASGD=False):  #default: n_epochs=100
+def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experiment_number, device="cpu", n_epochs=100, clip=5, ASGD_lr=2.5, n_nonmono=5, nonmono_ASGD=False):
     print("Starting experiment " + str(experiment_number) + "...\n")
     
     criterion_train = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"])
