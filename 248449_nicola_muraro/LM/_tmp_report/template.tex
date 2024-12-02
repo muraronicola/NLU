@@ -46,7 +46,7 @@ In general, the best machine learning models have high capacity and are properly
 For all configurations, the batch size for the training segment was kept constant at 64, while for the evaluation it was set at 128.
 
 
-In the first part, the initial model was created with the following specifications: \(hid \textunderscore size=600, out \textunderscore size=600, lr=1.5\).
+In the first part, the initial model was created with the following specifications: \(emb \textunderscore size=600, hidden \textunderscore size=500, lr=1.5\).
 The use of dropout yielded better results with a probability of \(p=0.3\). Finally, after replacing the optimizer with AdamW, I adjusted the learning rate to 0.0005.
 As we can see from the results shown in table \ref{tab:results1}, only the first two modifications led to improved performance. 
 We can observe that the addition of AdamW does not result in an improvement in performance on the validation set. However, it leads to an improvement on the test set. This might suggest better generalization by this optimizer, but not consistently across both datasets. Consequently, as it does not improve the values on the validation set, this modification was disregarded in the final model. For optimal generalization we cannot implement a modification based solely on its performance on the test set, since we generally would not have access to such data.
@@ -75,8 +75,8 @@ The training process of the best model is depicted in Figure \ref{fig:fig1}.
 \end{figure}
 
 
-For the second part, starting with the same configuration as before \((hid \textunderscore size=500, out \textunderscore size=600, lr=1.5)\), I modified the layer sizes to use weight tying.
-The model now has \(hid \textunderscore size=out \textunderscore size=600\).
+For the second part, starting with the same configuration as before \((emb \textunderscore size=600, hidden \textunderscore size=500, lr=1.5)\), I modified the layer sizes to use weight tying.
+The model now has \(emb \textunderscore size=hid \textunderscore size=600\).
 Regarding Variational Dropout, I tested all four possible combinations for changing the mask: (1) one mask for both layers (fixed); (2) one mask for both layers (changed every epoch); (3) two masks (one per layer, fixed); (4) two masks (one per layer, changed every epoch). The best performance was achieved with the third option: using a different mask for each layer of dropout and changing it every epoch.
 Finally, as shown in table \ref{tab:results2}, I completed the assignment using NT-AvSGD.
 The last model switches to AvSGD only in the last few epochs, yet this still enables the model to reach a lower perplexity value.
