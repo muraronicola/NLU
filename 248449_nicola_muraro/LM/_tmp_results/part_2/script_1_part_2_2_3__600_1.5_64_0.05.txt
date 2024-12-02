@@ -1,5 +1,0 @@
-Test ppl: 125.85888164951442
-Eval ppl: 129.4317017461068
-Train ppl: 69.6142986089162
-
-Stopped after 23 epochs

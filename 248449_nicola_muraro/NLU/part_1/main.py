@@ -37,7 +37,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     print("Starting experiment 1...\n")
     
     for i in tqdm(range(0, runs)):
-        first_model = ModelIAS(out_slot, out_int, vocab_len, emb_size=300, hid_size=200).to(device)
+        first_model = ModelIAS(out_slot, out_int, vocab_len, emb_size=300, hid_size=300).to(device)
         first_model.apply(init_weights)
         
         optimizer = optim.Adam(first_model.parameters(), lr=0.0001)
@@ -65,7 +65,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     print("Starting experiment 2...\n")
     
     for i in tqdm(range(0, runs)):
-        second_model = ModelIAS(out_slot, out_int, vocab_len, emb_size=300, hid_size=200, dropout_value=0.1).to(device)
+        second_model = ModelIAS(out_slot, out_int, vocab_len, emb_size=300, hid_size=300, dropout_value=0.3).to(device)
         second_model.apply(init_weights)
         
         optimizer = optim.Adam(second_model.parameters(), lr=0.0001)

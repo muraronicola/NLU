@@ -41,7 +41,7 @@ if __name__ == "__main__": #Aggiungo argomenti per il main (dalla console)
     
     
     #First experiment
-    first_model = ModelIAS(model_bert_base, hiddenSize_new, out_slot, out_int, device=device).to(device)
+    first_model = ModelIAS(model_bert_base, hiddenSize_new, out_slot, out_int, drop_value=0.1, device=device).to(device)
     first_model.apply(init_weights)
     optimizer = optim.Adam(first_model.parameters(), lr=0.0001)
     

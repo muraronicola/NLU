@@ -5,11 +5,11 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 class ModelIAS(nn.Module):
 
-    def __init__(self, model_bert, hiddenSize, out_slot, out_int, device="cpu"):
+    def __init__(self, model_bert, hiddenSize, out_slot, out_int, drop_value=0.1, device="cpu"):
         super(ModelIAS, self).__init__()
         self.bert = model_bert
         
-        self.dropout = nn.Dropout(0.1)
+        self.dropout = nn.Dropout(drop_value)
         
         self.slotFillingLayer = nn.Linear(hiddenSize, out_slot)
         self.intentLayer = nn.Linear(hiddenSize, out_int)
