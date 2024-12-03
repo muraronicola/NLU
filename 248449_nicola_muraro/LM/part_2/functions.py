@@ -83,7 +83,7 @@ def train_loop(data, optimizer, criterion, model, clip=5): #Train the model for 
 
 
 
-def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_eval):#Evaluate the model on the train, dev and test set
+def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_eval): #Evaluate the model on the train, dev and test set
     ppl_train, loss_train = eval_loop(train_loader, criterion_eval, model)
     ppl_dev, loss_dev = eval_loop(dev_loader, criterion_eval, model)
     ppl_test, loss_test = eval_loop(test_loader, criterion_eval, model)

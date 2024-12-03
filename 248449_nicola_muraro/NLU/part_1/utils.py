@@ -16,8 +16,7 @@ class LoadData():
         self.__train_raw, self.__dev_raw = self.__createDevSet(__original_train_raw_file)
         
         
-        
-        if lang is not None:
+        if lang is not None: #If we are evaluating a saved model we need to pass the lang object (saved during training)
             self.__lang = lang
         else:
             __words, __corpus, __intents, __slots = self.__createDatasetInformation(self.__train_raw, self.__dev_raw, self.__test_raw)
@@ -68,10 +67,7 @@ class LoadData():
         
         return X_train, X_dev
     
-    def get_raw_train_data(self): #Boh vediamo. Credo che la toglierò
-        return self.__train_raw
-    
-    def get_lang(self):
+    def get_lang(self): #Return the lang object
         return self.__lang
     
     def get_dataset_loaders(self, batch_size_train=64, batch_size_val=128, batch_size_test=128):
@@ -82,7 +78,7 @@ class LoadData():
         return train_loader, dev_loader, test_loader
 
 
-class Lang():
+class Lang(): #This class will be used to handle the vocabulary
     def __init__(self, words, intents, slots, pad_token, cutoff=0):
         self.pad_token = pad_token
         
@@ -111,8 +107,7 @@ class Lang():
                 vocab[elem] = len(vocab)
         return vocab
 
-class IntentsAndSlots (data.Dataset):
-    # Mandatory methods are __init__, __len__ and __getitem__
+class IntentsAndSlots (data.Dataset): # This class will be used to handle the dataset
     def __init__(self, dataset, lang, unk='unk'):
         self.utterances = []
         self.intents = []
@@ -139,7 +134,6 @@ class IntentsAndSlots (data.Dataset):
         return sample
     
     # Auxiliary methods
-    
     def mapping_lab(self, data, mapper):
         return [mapper[x] if x in mapper else mapper[self.unk] for x in data]
     
@@ -156,7 +150,7 @@ class IntentsAndSlots (data.Dataset):
         return res
 
 
-def collate_fn(data, pad_token=0, device="cpu"):
+def collate_fn(data, pad_token=0, device="cpu"): #This function will be used to pad the sequences in the dataloader
     def merge(sequences):
         '''
         merge from batch * sent_len to batch * max_len 

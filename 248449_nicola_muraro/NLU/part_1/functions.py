@@ -11,7 +11,7 @@ from sklearn.metrics import classification_report
 import re
 import os
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device="cpu", n_epochs=200, clip=5):  #default: n_epochs=200
+def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device="cpu", n_epochs=200, clip=5): #
     
     best_model = copy.deepcopy(model).to('cpu')
     patience = 3
@@ -23,59 +23,48 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
         if x % 5 == 0:
             results_dev, _, _ = eval_loop(dev_loader, criterion_slots, criterion_intents, model, lang)
             f1 = results_dev['total']['f']
-            if f1 > best_f1:
+            
+            if f1 > best_f1: # Save the best model (until now)
                 best_f1 = f1
                 patience = 3
-                #The patient is reset every time we find a new best f1
                 best_model = copy.deepcopy(model).to('cpu')
             else:
                 patience -= 1
             if patience <= 0: # Early stopping with patient
-                break # Not nice but it keeps the code clean
+                break
             
     return best_model.to(device), best_f1
 
 
-def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang):
 
+def train_loop(data, optimizer, criterion_slots, criterion_intents, model, clip=5): #Train one epoch
+    model.train()
+    loss_array = []
+    for sample in data:
+        optimizer.zero_grad() # Zeroing the gradient
+        
+        slots, intent = model(sample['utterances'], sample['slots_len'])
+        
+        loss_intent = criterion_intents(intent, sample['intents'])
+        loss_slot = criterion_slots(slots, sample['y_slots'])
+        loss = loss_intent + loss_slot # Sum the losses
+        
+        loss_array.append(loss.item())
+        loss.backward() 
+
+        torch.nn.utils.clip_grad_norm_(model.parameters(), clip)  
+        optimizer.step() # Update the weights
+    return loss_array
+
+
+
+def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang): #Evaluate the model on the train, dev and test set
     results_train, intent_train, loss_train = eval_loop(train_loader, criterion_slots, criterion_intents, model, lang)
     results_dev, intent_dev, loss_dev = eval_loop(dev_loader, criterion_slots, criterion_intents, model, lang)
     results_test, intent_test, loss_test = eval_loop(test_loader, criterion_slots, criterion_intents, model, lang)
     
     return results_train, results_dev, results_test, intent_train, intent_dev, intent_test, loss_train, loss_dev, loss_test
 
-
-def print_results(intent_acc, slot_f1s, title=""):
-    print("\n" + title)
-    
-    slot_f1s = np.asarray(slot_f1s)
-    intent_acc = np.asarray(intent_acc)
-    
-    print('Slot F1', round(slot_f1s.mean(),3), '+-', round(slot_f1s.std(),3))
-    print('Intent Acc', round(intent_acc.mean(), 3), '+-', round(slot_f1s.std(), 3))
-    print("\n")
-    print("-"*50)
-    print("\n")
-
-
-
-def train_loop(data, optimizer, criterion_slots, criterion_intents, model, clip=5):
-    model.train()
-    loss_array = []
-    for sample in data:
-        optimizer.zero_grad() # Zeroing the gradient
-        slots, intent = model(sample['utterances'], sample['slots_len'])
-        loss_intent = criterion_intents(intent, sample['intents'])
-        loss_slot = criterion_slots(slots, sample['y_slots'])
-        loss = loss_intent + loss_slot # In joint training we sum the losses. 
-                                       # Is there another way to do that?
-                                       # (alpha) * loss_intent + (1-alpha) * loss_slot
-        loss_array.append(loss.item())
-        loss.backward() # Compute the gradient, deleting the computational graph
-        # clip the gradient to avoid exploding gradients
-        torch.nn.utils.clip_grad_norm_(model.parameters(), clip)  
-        optimizer.step() # Update the weights
-    return loss_array
 
 
 def eval_loop(data, criterion_slots, criterion_intents, model, lang):
@@ -87,16 +76,16 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang):
     
     ref_slots = []
     hyp_slots = []
-    #softmax = nn.Softmax(dim=1) # Use Softmax if you need the actual probability
-    with torch.no_grad(): # It used to avoid the creation of computational graph
+
+    with torch.no_grad(): #We are not interested in the gradients
         for sample in data:
             slots, intents = model(sample['utterances'], sample['slots_len'])
+            
             loss_intent = criterion_intents(intents, sample['intents'])
             loss_slot = criterion_slots(slots, sample['y_slots'])
             loss = loss_intent + loss_slot 
             loss_array.append(loss.item())
-            # Intent inference
-            # Get the highest probable class
+
             out_intents = [lang.id2intent[x] for x in torch.argmax(intents, dim=1).tolist()] 
             gt_intents = [lang.id2intent[x] for x in sample['intents'].tolist()]
             ref_intents.extend(gt_intents)
@@ -120,18 +109,14 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang):
         results = evaluate(ref_slots, hyp_slots)
     except Exception as ex:
         # Sometimes the model predicts a class that is not in REF
-        #print("Warning:", ex) #It was uncommented
-        #ref_s = set([x[1] for x in ref_slots])
-        #hyp_s = set([x[1] for x in hyp_slots])
-        #print(hyp_s.difference(ref_s)) #It was uncommented
         results = {"total":{"f":0}}
         
-    report_intent = classification_report(ref_intents, hyp_intents, 
-                                          zero_division=False, output_dict=True)
+    report_intent = classification_report(ref_intents, hyp_intents, zero_division=False, output_dict=True)
     return results, report_intent, loss_array
 
 
-def init_weights(mat):
+
+def init_weights(mat): #Initialize the weights of the model
     for m in mat.modules():
         if type(m) in [nn.GRU, nn.LSTM, nn.RNN]:
             for name, param in m.named_parameters():
@@ -150,18 +135,6 @@ def init_weights(mat):
                 torch.nn.init.uniform_(m.weight, -0.01, 0.01)
                 if m.bias != None:
                     m.bias.data.fill_(0.01)
-
-
-
-def final_result_summary(summary_results): #print and return the best model
-    best_model = min(summary_results, key=lambda x: x[2])
-    print("")
-    print("-"*50)
-    print("-"*50)
-    print(f"\nThe best model is the {best_model[0]}, with a dev slot f1 of {best_model[2]}\n")
-    print("-"*50)
-    print("-"*50)
-    return best_model
 
 
 def save_best_model(best_model, lang, path="./bin/"):
@@ -185,6 +158,28 @@ def save_best_model(best_model, lang, path="./bin/"):
 
 
 
+def print_results(intent_acc, slot_f1s, title=""): #Print the results of the experiment
+    print("\n" + title)
+    
+    slot_f1s = np.asarray(slot_f1s)
+    intent_acc = np.asarray(intent_acc)
+    
+    print('Slot F1', round(slot_f1s.mean(),3), '+-', round(slot_f1s.std(),3))
+    print('Intent Acc', round(intent_acc.mean(), 3), '+-', round(slot_f1s.std(), 3))
+    print("\n")
+    print("-"*50)
+    print("\n")
+
+
+def final_result_summary(summary_results): #print and return the best model
+    best_model = min(summary_results, key=lambda x: x[2])
+    print("")
+    print("-"*50)
+    print("-"*50)
+    print(f"\nThe best model is the {best_model[0]}, with a dev slot f1 of {best_model[2]}\n")
+    print("-"*50)
+    print("-"*50)
+    return best_model
 
 
 
@@ -194,17 +189,13 @@ def save_best_model(best_model, lang, path="./bin/"):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#Functions taken from the conn.py script
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
 
 
 
@@ -310,20 +301,6 @@ def parse_iob(t):
 
 
 def is_boc(lbl, iob, prev_lbl, prev_iob, otag='O'):
-    """
-    is beginning of a chunk
-
-    supports: IOB, IOBE, BILOU schemes
-        - {E,L} --> last
-        - {S,U} --> unit
-
-    :param lbl: current label
-    :param iob: current iob
-    :param prev_lbl: previous label
-    :param prev_iob: previous iob
-    :param otag: out-of-chunk label
-    :return:
-    """
     boc = False
 
     boc = True if iob in ['B', 'S', 'U'] else boc
@@ -339,20 +316,6 @@ def is_boc(lbl, iob, prev_lbl, prev_iob, otag='O'):
 
 
 def is_eoc(lbl, iob, prev_lbl, prev_iob, otag='O'):
-    """
-    is end of a chunk
-
-    supports: IOB, IOBE, BILOU schemes
-        - {E,L} --> last
-        - {S,U} --> unit
-
-    :param lbl: current label
-    :param iob: current iob
-    :param prev_lbl: previous label
-    :param prev_iob: previous iob
-    :param otag: out-of-chunk label
-    :return:
-    """
     eoc = False
 
     eoc = True if iob in ['E', 'L', 'S', 'U'] else eoc
@@ -388,12 +351,6 @@ def summarize(seg, cls):
 
 
 def read_corpus_conll(corpus_file, fs="\t"):
-    """
-    read corpus in CoNLL format
-    :param corpus_file: corpus in conll format
-    :param fs: field separator
-    :return: corpus
-    """
     featn = None  # number of features for consistency check
     sents = []  # list to hold words list sequences
     words = []  # list to hold feature tuples

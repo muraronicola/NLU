@@ -6,7 +6,6 @@ import argparse
 
 if __name__ == "__main__":
     
-
     #Parse the arguments from the console
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--device", type=str, help = "The device on which run the model", default="cuda:0")
@@ -21,15 +20,13 @@ if __name__ == "__main__":
     model_path_eval = args.model
 
 
-
     #Load the dataset
     train_path = "./dataset/train.json"
     test_path = "./dataset/test.json"
 
+
     runs = 5
     pad_token = 0
-
-    
     criterion_slots = nn.CrossEntropyLoss(ignore_index=pad_token)
     criterion_intents = nn.CrossEntropyLoss()
     
@@ -44,6 +41,7 @@ if __name__ == "__main__":
         out_int = len(lang.intent2id)
         vocab_len = len(lang.word2id)
         
+
 
         #First experiment
         slot_f1s_1, intent_acc = [], []
@@ -98,7 +96,7 @@ if __name__ == "__main__":
 
 
         #Summary of all the experiments
-        summary_results = zip(("first model", "second model"), (first_trained_model, second_trained_model), (round(slot_f1s_1.mean(),3), round(slot_f1s_2.mean(),3)))
+        summary_results = zip(("first model", "second model"), (first_trained_model, second_trained_model), (round(np.asarray(slot_f1s_1).mean(),3), round(np.asarray(slot_f1s_2).mean(),3)))
         best_model = final_result_summary(summary_results)
         
         #Saving the best model to disk
@@ -120,6 +118,10 @@ if __name__ == "__main__":
         best_model.to(device)
 
         _, _, results_test, _, _, intent_test, _, _, _ = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang)
-        print("Results of the best model:")
-        print("Intent accuracy: ", intent_test['accuracy'])
-        print("Slot F1: ", results_test['total']['f'])
+        
+        print("\nResults of the best model:")
+        print('Slot F1', round(results_test['total']['f'], 3))
+        print('Intent Acc', round(intent_test['accuracy'], 3))
+        print("\n")
+        print("-"*50)
+        print("\n")
