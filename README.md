@@ -2,6 +2,8 @@ controllo che i valori ottenuti con il nuovo codice siano comparabili a quelli o
 controllo che i nomi delle variabili/metodi abbiano un senso
 
 
+TOLGO i file txt.tmp (in ./bin/)
+
 
 in entrambi 2: forse ho invertito in evaluate e la print l'ordine tra i risultati di slot and intent
 
