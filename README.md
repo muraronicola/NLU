@@ -1,8 +1,9 @@
-controllo che i valori ottenuti con il nuovo codice siano comparabili a quelli ottenuti con il codice "scritto male da me" e quelli messi sui reporttt
+controllo che i valori ottenuti con il nuovo codice siano comparabili a quelli ottenuti con il codice "scritto male da me" e quelli messi sui reporttt (soprattitto in 3_1, sito che l'evaluation è diversa)
 controllo che i nomi delle variabili/metodi abbiano un senso
 
 
 TOLGO i file txt.tmp (in ./bin/)
+TOLGO i file dei latex/report (in _tmp_report)
 
 
 in entrambi 2: forse ho invertito in evaluate e la print l'ordine tra i risultati di slot and intent
