@@ -179,7 +179,7 @@ def final_result_summary(summary_results): #print and return the best model
     print(f"\nThe best model is the {best_model[0]}, with a dev slot f1 of {best_model[2]}\n")
     print("-"*50)
     print("-"*50)
-    return best_model
+    return best_model[1]
 
 
 

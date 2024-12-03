@@ -115,7 +115,6 @@ def save_best_model(best_model, lang, path="./bin/"): #Save the best model to di
     new_file = False
     complete_filename = ""
     counter = 0
-    best_model.to(device) #Move the model to the device
     
     while not new_file: #Check if the file already exists, if so, generate a new filename
         id = str(counter)
