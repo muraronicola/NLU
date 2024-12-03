@@ -109,7 +109,7 @@ def init_weights(mat): #Initialize the weights of the model
                     m.bias.data.fill_(0.01)
 
 
-def save_best_model(best_model, lang, path="./bin/", device="cpu"): #Save the best model to disk
+def save_best_model(best_model, lang, path="./bin/"): #Save the best model to disk
     base_filename = "best_model_"
     extension= ".pt"
     new_file = False

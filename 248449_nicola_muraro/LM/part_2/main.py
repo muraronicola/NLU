@@ -83,7 +83,7 @@ if __name__ == "__main__":
         
         #Saving the best model to disk
         if save_model:
-            save_best_model(best_model, lang, path="./bin/", device=device)
+            save_best_model(best_model, lang, path="./bin/")
     
     
     else: #Evaluating only the best model (loaded from the model_path_eval)
@@ -100,5 +100,5 @@ if __name__ == "__main__":
         best_model.load_state_dict(state_dict)
         best_model.to(device)
 
-        ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, lang, criterion_eval) #Evaluate the model
+        ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test, title="Results of the best save model:")

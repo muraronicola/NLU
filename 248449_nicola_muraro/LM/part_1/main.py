@@ -82,7 +82,7 @@ if __name__ == "__main__":
         
         #Saving the best model to disk
         if save_model:
-            save_best_model(best_model, lang, path="./bin/", device=device)
+            save_best_model(best_model, lang, path="./bin/")
     
     
     else: #Evaluating only the best model (loaded from the model_path_eval)
