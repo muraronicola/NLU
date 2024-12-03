@@ -18,10 +18,11 @@ INFINE: metto le epoche al valore corretto (al momento sono 1 o 2 per debug)
 ->Forse avsGD non viene triggerato in Ass1_2; da controllare (la run singola fuziona, da controllare se con anche le prime due abilitate il coso va.)
 
 2_2: c'era un combined_loss = loss_intent+ loss_slot, in eval. Doveve assere combined_loss = loss_intent*0.1 + loss_slot*0.9
-
+2_2: non funziona
 
 
 
 3_1: Potremmo sistemare un po' il codice quando chiamo il modello e creo i dizionari (sia qui che in 2_2)
+3_1: C'è un try catch cattivissimo nell'eval loop
 
 IN tutte controllo il load/save del modello; aggiungo la cartella ./bin/ per il salvataggio dei modelli e metto il best modello eva

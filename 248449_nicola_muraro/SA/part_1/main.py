@@ -50,7 +50,12 @@ if __name__ == "__main__":
         
         first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device=device)
         _, _, slot_test_f1 = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device=device)
+        first_trained_model.to("cpu")
         print_results(slot_test_f1)
+        
+        if save_model:
+            save_best_model(first_trained_model, lang, "./bin/")
+        
     else:
         saved_info = torch.load(model_path_eval)
         state_dict = saved_info["state_dict"]

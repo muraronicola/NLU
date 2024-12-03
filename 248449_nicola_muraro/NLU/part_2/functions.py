@@ -37,7 +37,7 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
     return best_model.to(device)
 
 
-def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang, device="cpu", clip=5):
+def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang, device="cpu", clip=5): #Train the model one epoch 
     model.train()
     loss_array = []
     

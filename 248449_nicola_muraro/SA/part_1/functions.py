@@ -12,14 +12,13 @@ import re
 import string
 from nltk import ngrams
 import numpy as np
-# DO NOT change the random seed, otherwise, the train-test split will be inconsistent with those in the baselines
 np.random.seed(7894)
 import os
 import pickle
 
 SMALL_POSITIVE_CONST = 1e-4
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device="cpu", n_epochs=200, clip=5):  #default: n_epochs=200
+def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device="cpu", n_epochs=200, clip=5):
     print("Starting experiment...\n")
     
     best_model = copy.deepcopy(model).to('cpu')
@@ -30,44 +29,22 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
     for x in pbar:
         loss = train_loop(train_loader, optimizer, criterion_slots, model, device=device, clip=clip)
         
-        #print("train Loss: ", loss)
-        
-        if x % 1 == 0: #O metto 5?
+        if x % 1 == 0:
             f1, _, = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
             
             if f1 >= best_f1: #Era f1 > best_f1
                 best_f1 = f1
                 patience = 10
-                #The patient is reset every time we find a new best f1
-                best_model = copy.deepcopy(model).to('cpu')
+                best_model = copy.deepcopy(model).to('cpu') #save the best model
             else:
                 patience -= 1
             if patience <= 0: # Early stopping with patient
-                break # Not nice but it keeps the code clean
+                break
             
     return best_model.to(device)
 
 
-def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device="cpu"):
-
-    slot_train_f1, _ = eval_loop(train_loader, criterion_slots, model, lang, pad_token, device=device)
-    slot_dev_f1, _ = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
-    slot_test_f1, _ = eval_loop(test_loader, criterion_slots, model, lang, pad_token, device=device)
-    
-    return slot_train_f1, slot_dev_f1, slot_test_f1
-
-
-def print_results(slot_f1s):
-    print("\nResults of the experiment:")
-    
-    print('Slot F1', round(slot_f1s, 3))
-    print("\n")
-    print("-"*50)
-    print("\n")
-
-
-
-def train_loop(data, optimizer, criterion_slots, model, device="cpu", clip=5):
+def train_loop(data, optimizer, criterion_slots, model, device="cpu", clip=5): #Train the model one epoch 
     model.train()
     loss_array = []
     
@@ -78,21 +55,29 @@ def train_loop(data, optimizer, criterion_slots, model, device="cpu", clip=5):
         tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
         tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
         tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
-        tokenizedUtterance = sample['tokenizedUtterance']
         length_token_bert = sample['length_token_bert']
         
-        inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
+        inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids} # Create the input dictionary to pass to BERT
         
         slots = model(inputs_bert, sample['frase_testo'], length_token_bert, sample['text_suddiviso'])
         
         loss = criterion_slots(slots, sample['y_slots'])
-        
         loss_array.append(loss.item())
-        loss.backward() # Compute the gradient, deleting the computational graph
+        loss.backward()
+        
         torch.nn.utils.clip_grad_norm_(model.parameters(), clip)  
         optimizer.step() # Update the weight
         
     return loss_array
+
+
+def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, lang, pad_token, device="cpu"):
+    slot_train_f1, _ = eval_loop(train_loader, criterion_slots, model, lang, pad_token, device=device)
+    slot_dev_f1, _ = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
+    slot_test_f1, _ = eval_loop(test_loader, criterion_slots, model, lang, pad_token, device=device)
+    
+    return slot_train_f1, slot_dev_f1, slot_test_f1
+
 
 
 def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
@@ -110,7 +95,7 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
             tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
             tokenizedUtterance = sample['tokenizedUtterance']
             
-            inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
+            inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids} #input dictionary to pass to BERT
             
             
             slots = model(inputs_bert, sample['frase_testo'], sample['length_token_bert'], sample['text_suddiviso'])
@@ -123,73 +108,34 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
             true_y = sample['y_slots'].detach().cpu().numpy()
             
             
-            #output_slots_hyp = true_y  #FOR DEBUGGING ONLY, REMOVE BEFORE SUBMISSION
-            #ot2bieos_ote_batch(ref_labels_plain)
-            #ot2bieos_ote_batch(hyp_labels_plain)
-            #results = evaluate_ote(ot2)
-            
-            
             for sequenza in range(len(output_slots_hyp)):
-                #len_frase = len(sample['text_suddiviso'][sequenza])
                 try:
-                    first_index_of_pad = true_y[sequenza].tolist().index(pad_token)#Tricky, devo salvarmi quanta lunga è la predizione
+                    first_index_of_pad = true_y[sequenza].tolist().index(pad_token) #Tricky, devo salvarmi quanta lunga è la predizione
                     
                     val_true_y = [lang.id2slot[element] for element in true_y[sequenza][:first_index_of_pad]]
                     val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[sequenza][:first_index_of_pad]]
                     
-                    converted_true_y = ot2bieos_ote(val_true_y)  #ot2bio_ote does not work
-                    converted_hat_y = ot2bieos_ote(val_hat_y)   #t2 era: ot2bieos_ote
-                    
-                    """ print("og true_y:", true_y[sequenza][:first_index_of_pad])
-                    print("og hat_y:", output_slots_hyp[sequenza][:first_index_of_pad])
-                    
-                    print("val_hat_y: ", val_true_y)
-                    print("val_hat_y: ", val_hat_y)
-                    
-                    print("converted_true_y: ", converted_true_y)
-                    print("converted_hat_y: ", converted_hat_y) """
+                    converted_true_y = ot2bieos_ote(val_true_y)
+                    converted_hat_y = ot2bieos_ote(val_hat_y)
                     
                     ref_slots.append(converted_true_y)
                     hyp_slots.append(converted_hat_y)
                     
-                except:
+                except: #Done if there is not the pad token
                     val_true_y = [lang.id2slot[element] for element in true_y[sequenza]]
                     val_hat_y = [lang.id2slot[element] for element in output_slots_hyp[sequenza]]
                     
                     converted_true_y = ot2bieos_ote(val_true_y)
                     converted_hat_y = ot2bieos_ote(val_hat_y)
                     
-                    
-                    """ print("og true_y:", true_y[sequenza][:first_index_of_pad])
-                    print("og hat_y:", output_slots_hyp[sequenza][:first_index_of_pad])
-                    
-                    print("val_hat_y: ", val_true_y)
-                    print("val_hat_y: ", val_hat_y)
-                    
-                    print("converted_true_y: ", converted_true_y)
-                    print("converted_hat_y: ", converted_hat_y) """
-                    
                     ref_slots.append(converted_true_y)
                     hyp_slots.append(converted_hat_y)   
             
-            #exit(0)
-            
     
     scores = evaluate_ote(ref_slots, hyp_slots)
-    
-    """ print("\n\n 5 preds: ")
-    print("ref_slots", ref_slots[:5])
-    print("hyp_slots", hyp_slots[:5]) """
-    
-    #print("scores: ", scores)
     f1_score = scores[2]
-    
-    """ print("\n\n\n\n\nRef slots: ", ref_slots)
-    print("Hyp slots: ", hyp_slots)
-    print("F1 score: ", f1_score) """
-    
     print("F1 score: ", f1_score)
-    #exit(0)
+    
     return f1_score, loss_array
 
 def init_weights(mat):
@@ -212,6 +158,54 @@ def init_weights(mat):
                 if m.bias != None:
                     m.bias.data.fill_(0.01)
                     
+
+def save_best_model(best_model, lang, path="./bin/"):
+    base_filename = "best_model_"
+    extension= ".pt"
+    new_file = False
+    complete_filename = ""
+    counter = 0
+    
+    while not new_file: #Check if the file already exists, if so, generate a new filename
+        id = str(counter)
+        complete_filename = base_filename + id + extension
+        
+        if not os.path.exists(f"{path}{complete_filename}"):
+            new_file = True
+            
+        counter+=1
+        
+    saving_object = {"state_dict": best_model.state_dict(), "lang": lang}
+    torch.save(saving_object, f"{path}{complete_filename}") #Save the best model to the bin folder
+
+
+def print_results(slot_f1s):
+    print("\nResults of the experiment:")
+    
+    print('Slot F1', round(slot_f1s, 3))
+    print("\n")
+    print("-"*50)
+    print("\n")
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#Functions taken from the conn.py and evals.py script
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+
+
+
+
 
 def stats():
     return {'cor': 0, 'hyp': 0, 'ref': 0}
