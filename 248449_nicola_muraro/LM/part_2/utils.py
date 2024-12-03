@@ -6,12 +6,15 @@ import torch
 
 class LoadData():
     
-    def __init__(self, train_path, dev_path, test_path, device="cpu", special_tokens=["<pad>", "<eos>"]):
+    def __init__(self, train_path, dev_path, test_path, device="cpu", special_tokens=["<pad>", "<eos>"], lang=None):
         self.__train_raw = self.__read_file(train_path)
         self.__dev_raw = self.__read_file(dev_path)
         self.__test_raw = self.__read_file(test_path)
         
-        self.__lang = Lang(self.__train_raw, special_tokens)
+        if lang is not None: #If we are evaluating a saved model we need to pass the lang object (saved during training)
+            self.__lang = lang
+        else:
+            self.__lang = Lang(self.__train_raw, special_tokens)
         
         self.__train_dataset = PennTreeBank(self.__train_raw, self.__lang)
         self.__dev_dataset = PennTreeBank(self.__dev_raw, self.__lang)
@@ -26,10 +29,7 @@ class LoadData():
                 output.append(line.strip() + " " + eos_token)
         return output
     
-    def get_raw_train_data(self): #Boh vediamo. Credo che la toglierò
-        return self.__train_raw
-    
-    def get_lang(self):
+    def get_lang(self): #Return the lang object
         return self.__lang
     
     def get_dataset_loaders(self, batch_size_train=64, batch_size_val=128, batch_size_test=128, pad_token="<pad>"):
@@ -40,7 +40,7 @@ class LoadData():
         return train_loader, dev_loader, test_loader
 
 
-class Lang():
+class Lang(): #This class will be used to handle the vocabulary
     def __init__(self, corpus, special_tokens=[]):
         self.word2id = self.get_vocab(corpus, special_tokens)
         self.id2word = {v:k for k, v in self.word2id.items()}
@@ -59,8 +59,7 @@ class Lang():
 
 
 
-class PennTreeBank (data.Dataset):
-    # Mandatory methods are __init__, __len__ and __getitem__
+class PennTreeBank (data.Dataset): #This class will be used to convert the raw text into a compatible dataset
     def __init__(self, corpus, lang):
         self.source = []
         self.target = []
@@ -68,7 +67,6 @@ class PennTreeBank (data.Dataset):
         for sentence in corpus:
             self.source.append(sentence.split()[0:-1]) # We get from the first token till the second-last token
             self.target.append(sentence.split()[1:]) # We get from the second token till the last token
-            # See example in section 6.2
         
         self.source_ids = self.mapping_seq(self.source, lang)
         self.target_ids = self.mapping_seq(self.target, lang)
@@ -99,7 +97,7 @@ class PennTreeBank (data.Dataset):
         return res  
 
 
-def collate_fn(data, pad_token, device="cpu"):
+def collate_fn(data, pad_token, device="cpu"): #This function will be used to pad the sequences in the dataloader
     def merge(sequences):
         '''
         merge from batch * sent_len to batch * max_len 

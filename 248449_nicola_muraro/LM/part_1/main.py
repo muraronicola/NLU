@@ -3,7 +3,6 @@ from utils import LoadData
 from model import LM_LSTM
 from torch import optim
 import argparse
-import os
 
 if __name__ == "__main__":
     
@@ -45,7 +44,7 @@ if __name__ == "__main__":
         optimizer = optim.SGD(first_model.parameters(), lr=1.5)
         
         first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, experiment_number=1, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
-        ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_eval, lang) #Evaluate the model
+        ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 1:")
         first_trained_model.to("cpu") #Offload some of the memory of the GPU
         
@@ -58,7 +57,7 @@ if __name__ == "__main__":
         optimizer = optim.SGD(second_model.parameters(), lr=1.5)
         
         second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, experiment_number=2, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
-        ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, criterion_eval, lang) #Evaluate the model
+        ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 2:")
         second_trained_model.to("cpu") #Offload some of the memory of the GPU
         
@@ -71,7 +70,7 @@ if __name__ == "__main__":
         optimizer = optim.AdamW(third_model.parameters(), lr=0.0005)
         
         third_trained_model = execute_experiment(third_model, train_loader, dev_loader, optimizer, lang, experiment_number=3, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
-        ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(third_trained_model, train_loader, dev_loader, test_loader, criterion_eval, lang) #Evaluate the model
+        ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(third_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 3:")
         third_trained_model.to("cpu") #Offload some of the memory of the GPU
         
@@ -83,7 +82,7 @@ if __name__ == "__main__":
         
         #Saving the best model to disk
         if save_model:
-            save_best_model(best_model[1], lang, path="./bin/", device=device)
+            save_best_model(best_model, lang, path="./bin/", device=device)
     
     
     else: #Evaluating only the best model (loaded from the model_path_eval)
@@ -100,5 +99,5 @@ if __name__ == "__main__":
         best_model.load_state_dict(state_dict)
         best_model.to(device)
 
-        ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, criterion_eval, lang) #Evaluate the model
+        ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test, title="Results of the best save model:")

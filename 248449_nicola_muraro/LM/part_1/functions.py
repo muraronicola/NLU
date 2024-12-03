@@ -56,7 +56,7 @@ def train_loop(data, optimizer, criterion, model, clip=5): #Train the model for 
 
 
 
-def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_eval, lang): #Evaluate the model on the train, dev and test set
+def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_eval): #Evaluate the model on the train, dev and test set
     ppl_train, loss_train = eval_loop(train_loader, criterion_eval, model)
     ppl_dev, loss_dev = eval_loop(dev_loader, criterion_eval, model)
     ppl_test, loss_test = eval_loop(test_loader, criterion_eval, model)
@@ -148,4 +148,4 @@ def final_result_summary(summary_results): #print and return the best model
     print(f"\nThe best model is the {best_model[0]}, with a dev PPL of {best_model[2]}\n")
     print("-"*50)
     print("-"*50)
-    return best_model
+    return best_model[1]
