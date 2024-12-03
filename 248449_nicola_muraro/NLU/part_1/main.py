@@ -45,8 +45,8 @@ if __name__ == "__main__":
 
         #First experiment
         slot_f1s_1, intent_acc = [], []
-        best_f1_ever = 0
-        best_model_ever = None
+        best_f1_1 = 0
+        best_model_1 = None
         print("Starting experiment 1...\n")
         
         for i in tqdm(range(0, runs)):
@@ -56,23 +56,24 @@ if __name__ == "__main__":
             optimizer = optim.Adam(first_model.parameters(), lr=0.0001)
             
             first_trained_model, new_best_f1 = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
-            if new_best_f1 >= best_f1_ever:
-                best_model_ever = first_trained_model
-                best_f1_ever = new_best_f1
+            if new_best_f1 >= best_f1_1:
+                best_model_1 = first_trained_model
+                best_f1_1 = new_best_f1
                 
             _, _, results_test, _, _, intent_test, _, _, _ = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang)
             
             intent_acc.append(intent_test['accuracy'])
             slot_f1s_1.append(results_test['total']['f'])
-            
+
+        best_model_1.to("cpu")
         print_results(intent_acc, slot_f1s_1, title="Results of experiment 1:")
         
         
 
         #Second experiment
         slot_f1s_2, intent_acc = [], []
-        best_f1_ever = 0
-        best_model_ever = None
+        best_f1_2 = 0
+        best_model_2 = None
         print("Starting experiment 2...\n")
         
         for i in tqdm(range(0, runs)):
@@ -82,26 +83,26 @@ if __name__ == "__main__":
             optimizer = optim.Adam(second_model.parameters(), lr=0.0001)
             
             second_trained_model, new_best_f1 = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
-            if new_best_f1 >= best_f1_ever:
-                best_model_ever = second_trained_model
-                best_f1_ever = new_best_f1
+            if new_best_f1 >= best_f1_2:
+                best_model_2 = second_trained_model
+                best_f1_2 = new_best_f1
                 
             _, _, results_test, _, _, intent_test, _, _, _ = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang)
             
             intent_acc.append(intent_test['accuracy'])
             slot_f1s_2.append(results_test['total']['f'])
             
+        best_model_2.to("cpu")
         print_results(intent_acc, slot_f1s_2, title="Results of experiment 2:")
 
-
-
+        
         #Summary of all the experiments
         summary_results = zip(("first model", "second model"), (first_trained_model, second_trained_model), (round(np.asarray(slot_f1s_1).mean(),3), round(np.asarray(slot_f1s_2).mean(),3)))
         best_model = final_result_summary(summary_results)
         
         #Saving the best model to disk
         if save_model:
-            save_best_model(best_model[1], lang, "./bin/")
+            save_best_model(best_model, lang, "./bin/")
 
 
     else: #Evaluating only the best model (loaded from the model_path_eval)

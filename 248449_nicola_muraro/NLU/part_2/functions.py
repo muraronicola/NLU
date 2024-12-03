@@ -9,8 +9,9 @@ import numpy as np
 from torch import optim
 from sklearn.metrics import classification_report
 import re
+import os
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device="cpu", n_epochs=2, clip=5):  #default: n_epochs=200
+def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device="cpu", n_epochs=200, clip=5):
     print("Starting experiment...\n")
     
     best_model = copy.deepcopy(model).to('cpu')
@@ -21,43 +22,19 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
     for x in pbar:
         loss = train_loop(train_loader, optimizer, criterion_slots, criterion_intents, model, lang, device=device, clip=clip)
         
-        if x % 1 == 0: #O metto 5?
+        if x % 1 == 0:
             slot_dev, _, _ = eval_loop(dev_loader, criterion_slots, criterion_intents, model, lang, device=device)
             f1 = slot_dev['total']['f']
             if f1 > best_f1:
                 best_f1 = f1
                 patience = 10
-                #The patient is reset every time we find a new best f1
-                best_model = copy.deepcopy(model).to('cpu')
+                best_model = copy.deepcopy(model).to('cpu') #save the best model
             else:
                 patience -= 1
             if patience <= 0: # Early stopping with patient
-                break # Not nice but it keeps the code clean
+                break
             
     return best_model.to(device)
-
-
-def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang, device="cpu"):
-
-    slot_train, intent_train, loss_train = eval_loop(train_loader, criterion_slots, criterion_intents, model, lang, device=device)
-    slot_dev, intent_dev, loss_dev = eval_loop(dev_loader, criterion_slots, criterion_intents, model, lang, device=device)
-    slot_test, intent_test, loss_test = eval_loop(test_loader, criterion_slots, criterion_intents, model, lang, device=device)
-    
-    return slot_train, slot_dev, slot_test, intent_train, intent_dev, intent_test, loss_train, loss_dev, loss_test
-
-
-def print_results(slots, intent):
-    print("\nResults of the experiment:")
-    
-    slot_f1s = slots['total']['f']
-    intent_acc = intent['accuracy']
-    
-    print('Slot F1', round(slot_f1s, 3))
-    print('Intent Acc', round(intent_acc, 3))
-    print("\n")
-    print("-"*50)
-    print("\n")
-
 
 
 def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang, device="cpu", clip=5):
@@ -73,21 +50,32 @@ def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang,
         tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
         tokenizedUtterance = sample['tokenizedUtterance']
         
-        inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
+        inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids} # Create the input dictionary to pass to BERT
         
         slots, intent = model(inputs_bert, tokenizedUtterance)
         
         loss_intent = criterion_intents(intent, sample['intents'])
         loss_slot = criterion_slots(slots, sample['y_slots'])
         
-        combined_loss = loss_intent*0.1 + loss_slot*0.9 # In joint training we sum the losses. 
+        combined_loss = loss_intent*0.1 + loss_slot*0.9 #In joint training we sum the losses. 
         
         loss_array.append(combined_loss.item())
-        combined_loss.backward() # Compute the gradient, deleting the computational graph
+        combined_loss.backward() 
+        
         torch.nn.utils.clip_grad_norm_(model.parameters(), clip)  
         optimizer.step() # Update the weight
         
     return loss_array
+
+
+
+def evaluate_experiment(model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang, device="cpu"):
+    slot_train, intent_train, loss_train = eval_loop(train_loader, criterion_slots, criterion_intents, model, lang, device=device)
+    slot_dev, intent_dev, loss_dev = eval_loop(dev_loader, criterion_slots, criterion_intents, model, lang, device=device)
+    slot_test, intent_test, loss_test = eval_loop(test_loader, criterion_slots, criterion_intents, model, lang, device=device)
+    
+    return slot_train, slot_dev, slot_test, intent_train, intent_dev, intent_test, loss_train, loss_dev, loss_test
+
 
 
 def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu"):
@@ -115,7 +103,7 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
             
             loss_intent = criterion_intents(intents, sample['intents'])
             loss_slot = criterion_slots(slots, sample['y_slots'])
-            combined_loss = loss_intent + loss_slot 
+            combined_loss = loss_intent*0.1 + loss_slot*0.9 #In joint training we sum the losses.
             loss_array.append(combined_loss.item())
             
             
@@ -142,7 +130,6 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
                         tmp_seq.append((utterance[id_el], lang.id2slot[elem]))
                 hyp_slots.append(tmp_seq)
     
-    
     try:      
         slot_results = evaluate(ref_slots, hyp_slots)
     except Exception as ex:
@@ -151,7 +138,8 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
     intent_results = classification_report(ref_intents, hyp_intents, zero_division=False, output_dict=True)
     return slot_results, intent_results, loss_array
 
-def init_weights(mat):
+
+def init_weights(mat): # Function to initialize the weights of the model
     for m in mat.modules():
         if type(m) in [nn.GRU, nn.LSTM, nn.RNN]:
             for name, param in m.named_parameters():
@@ -170,7 +158,58 @@ def init_weights(mat):
                 torch.nn.init.uniform_(m.weight, -0.01, 0.01)
                 if m.bias != None:
                     m.bias.data.fill_(0.01)
-                    
+
+
+def save_best_model(best_model, lang, path="./bin/"):
+    base_filename = "best_model_"
+    extension= ".pt"
+    new_file = False
+    complete_filename = ""
+    counter = 0
+    
+    while not new_file: #Check if the file already exists, if so, generate a new filename
+        id = str(counter)
+        complete_filename = base_filename + id + extension
+        
+        if not os.path.exists(f"{path}{complete_filename}"):
+            new_file = True
+            
+        counter+=1
+        
+    saving_object = {"state_dict": best_model.state_dict(), "lang": lang}
+    torch.save(saving_object, f"{path}{complete_filename}") #Save the best model to the bin folder
+
+
+def print_results(slots, intent):
+    print("\nResults of the experiment:")
+    
+    slot_f1s = slots['total']['f']
+    intent_acc = intent['accuracy']
+    
+    print('Slot F1', round(slot_f1s, 3))
+    print('Intent Acc', round(intent_acc, 3))
+    print("\n")
+    print("-"*50)
+    print("\n")
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#Functions taken from the conn.py script
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+
+
+
 
 def stats():
     return {'cor': 0, 'hyp': 0, 'ref': 0}

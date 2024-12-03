@@ -56,8 +56,12 @@ if __name__ == "__main__":
         
         first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
         _, _, slot_test, _, _, intent_test, _, _, _ = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang, device=device)
-        
+        first_trained_model.to("cpu")
         print_results(slot_test, intent_test)
+        
+        
+        if save_model:
+            save_best_model(first_trained_model, lang, "./bin/")
 
     else: #Evaluate only the best model
         

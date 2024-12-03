@@ -11,7 +11,7 @@ from sklearn.metrics import classification_report
 import re
 import os
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device="cpu", n_epochs=200, clip=5): #
+def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device="cpu", n_epochs=200, clip=5):
     
     best_model = copy.deepcopy(model).to('cpu')
     patience = 3
@@ -172,7 +172,7 @@ def print_results(intent_acc, slot_f1s, title=""): #Print the results of the exp
 
 
 def final_result_summary(summary_results): #print and return the best model
-    best_model = min(summary_results, key=lambda x: x[2])
+    best_model = max(summary_results, key=lambda x: x[2])
     print("")
     print("-"*50)
     print("-"*50)
