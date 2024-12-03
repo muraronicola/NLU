@@ -31,8 +31,9 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
         
         if x % 1 == 0:
             f1, _, = eval_loop(dev_loader, criterion_slots, model, lang, pad_token, device=device)
+            pbar.set_description("F1: %f" % f1)
             
-            if f1 >= best_f1: #Era f1 > best_f1
+            if f1 >= best_f1:
                 best_f1 = f1
                 patience = 10
                 best_model = copy.deepcopy(model).to('cpu') #save the best model
@@ -134,7 +135,6 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
     
     scores = evaluate_ote(ref_slots, hyp_slots)
     f1_score = scores[2]
-    print("F1 score: ", f1_score)
     
     return f1_score, loss_array
 
