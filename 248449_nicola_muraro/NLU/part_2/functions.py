@@ -135,6 +135,7 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
     try:      
         slot_results = evaluate(ref_slots, hyp_slots)
     except Exception as ex:
+        print("Error in slot evaluation")
         slot_results = {"total":{"f":0}}
         
     intent_results = classification_report(ref_intents, hyp_intents, zero_division=False, output_dict=True)

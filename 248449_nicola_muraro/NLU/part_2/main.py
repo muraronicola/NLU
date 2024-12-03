@@ -52,7 +52,7 @@ if __name__ == "__main__":
         #First experiment
         first_model = ModelIAS(model_bert_base, hiddenSize_new, out_slot, out_int, drop_value=0.1, device=device).to(device)
         first_model.apply(init_weights)
-        optimizer = optim.Adam(first_model.parameters(), lr=0.0001)
+        optimizer = optim.Adam(model_bert_base.parameters(), lr=0.0001)
         
         first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
         _, _, slot_test, _, _, intent_test, _, _, _ = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_slots, criterion_intents, lang, device=device)
