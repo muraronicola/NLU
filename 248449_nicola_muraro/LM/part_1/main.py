@@ -21,19 +21,22 @@ if __name__ == "__main__":
     model_path_eval = args.model
     
     
-    
     #Load the dataset
     train_path = "./dataset/ptb.train.txt"
     dev_path = "./dataset/ptb.valid.txt"
     test_path = "./dataset/ptb.test.txt"
     
-    load_data = LoadData(train_path, dev_path, test_path, device=device)
-    train_loader, dev_loader, test_loader = load_data.get_dataset_loaders(batch_size_train=64, batch_size_val=128, batch_size_test=128)
-    
-    
     
     if not eval_only: #Train the models and evaluate all of them
+        load_data = LoadData(train_path, dev_path, test_path, device=device) #Create the LoadData object
+        train_loader, dev_loader, test_loader = load_data.get_dataset_loaders(batch_size_train=64, batch_size_val=128, batch_size_test=128)
         lang = load_data.get_lang() #Get the lang object
+        
+        #Loss functions
+        criterion_train = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"])
+        criterion_eval = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"], reduction='sum')
+        
+        
         
         #First experiment
         first_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"]).to(device)
@@ -41,9 +44,10 @@ if __name__ == "__main__":
         
         optimizer = optim.SGD(first_model.parameters(), lr=1.5)
         
-        first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, experiment_number=1, device=device)
-        ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, lang)
+        first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, experiment_number=1, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
+        ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_eval, lang) #Evaluate the model
         print_results(ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 1:")
+        first_trained_model.to("cpu") #Offload some of the memory of the GPU
         
         
         
@@ -53,9 +57,10 @@ if __name__ == "__main__":
         
         optimizer = optim.SGD(second_model.parameters(), lr=1.5)
         
-        second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, experiment_number=2, device=device)
-        ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, lang)
+        second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, experiment_number=2, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
+        ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, criterion_eval, lang) #Evaluate the model
         print_results(ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 2:")
+        second_trained_model.to("cpu") #Offload some of the memory of the GPU
         
         
         
@@ -65,19 +70,20 @@ if __name__ == "__main__":
         
         optimizer = optim.AdamW(third_model.parameters(), lr=0.0005)
         
-        third_trained_model = execute_experiment(third_model, train_loader, dev_loader, optimizer, lang, experiment_number=3, device=device)
-        ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(third_trained_model, train_loader, dev_loader, test_loader, lang)
+        third_trained_model = execute_experiment(third_model, train_loader, dev_loader, optimizer, lang, experiment_number=3, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
+        ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(third_trained_model, train_loader, dev_loader, test_loader, criterion_eval, lang) #Evaluate the model
         print_results(ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 3:")
+        third_trained_model.to("cpu") #Offload some of the memory of the GPU
         
         
         
         #Summary of all the experiments
         summary_results = zip(("first model", "second model", "third model"), (first_trained_model, second_trained_model, third_trained_model), (ppl_dev_1, ppl_dev_2, ppl_dev_3))
-        best_model = final_result_summary(summary_results)
+        best_model = final_result_summary(summary_results) #Get the best model (of the three trained)
         
         #Saving the best model to disk
         if save_model:
-            save_best_model(best_model[1], lang, "./bin/")
+            save_best_model(best_model[1], lang, path="./bin/", device=device)
     
     
     else: #Evaluating only the best model (loaded from the model_path_eval)
@@ -85,9 +91,14 @@ if __name__ == "__main__":
         state_dict = saved_info["state_dict"]
         lang = saved_info["lang"]
         
+        load_data = LoadData(train_path, dev_path, test_path, device=device, lang=lang) #Create the LoadData object
+        train_loader, dev_loader, test_loader = load_data.get_dataset_loaders(batch_size_train=64, batch_size_val=128, batch_size_test=128)
+        
+        criterion_eval = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"], reduction='sum')
+        
         best_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.3, out_dropout=0.3, pad_index=lang.word2id["<pad>"])
         best_model.load_state_dict(state_dict)
         best_model.to(device)
 
-        ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, lang)
+        ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(best_model, train_loader, dev_loader, test_loader, criterion_eval, lang) #Evaluate the model
         print_results(ppl_train, ppl_dev, ppl_test, loss_train, loss_dev, loss_test, title="Results of the best save model:")
