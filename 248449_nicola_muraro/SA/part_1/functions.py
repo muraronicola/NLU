@@ -53,14 +53,10 @@ def train_loop(data, optimizer, criterion_slots, model, device="cpu", clip=5): #
         
         optimizer.zero_grad() # Zeroing the gradient
         
-        tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
-        tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
-        tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
-        length_token_bert = sample['length_token_bert']
+        inputs_bert = get_input_bert(sample, device)
         
-        inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids} # Create the input dictionary to pass to BERT
-        
-        slots = model(inputs_bert, sample['frase_testo'], length_token_bert, sample['text_suddiviso'])
+        slots = model(inputs_bert)
+        slots = pad_reshape_slots(slots, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'], device)
         
         loss = criterion_slots(slots, sample['y_slots'])
         loss_array.append(loss.item())
@@ -90,16 +86,10 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
     
     with torch.no_grad(): # It used to avoid the creation of computational graph
         for sample in data:
+            inputs_bert = get_input_bert(sample, device)
             
-            tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
-            tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
-            tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
-            tokenizedUtterance = sample['tokenizedUtterance']
-            
-            inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids} #input dictionary to pass to BERT
-            
-            
-            slots = model(inputs_bert, sample['frase_testo'], sample['length_token_bert'], sample['text_suddiviso'])
+            slots = model(inputs_bert)
+            slots = pad_reshape_slots(slots, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'], device)
             
             loss = criterion_slots(slots, sample['y_slots'])
             loss_array.append(loss.item())
@@ -137,6 +127,52 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
     f1_score = scores[2]
     
     return f1_score, loss_array
+
+
+def get_input_bert(sample, device):
+    tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
+    tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
+    tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
+    
+    inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
+    return inputs_bert
+
+
+def pad_reshape_slots(results_slotFilling, frase_testo, text_suddiviso, length_token_bert, device):
+    #We need to pad the sequences to have the same length
+    shapeDim_1 = results_slotFilling[0].shape[1]
+    
+    for i in range(len(frase_testo)):
+        frase = []
+        daFondere = []
+        contatore = 0
+        
+        parole = text_suddiviso[i]
+        
+        indice_slot = 0
+        for j in range(0, len(parole)):
+            parola = parole[j]
+            length_token = length_token_bert[0][parola]
+
+            if(length_token > 1):
+                media = torch.mean(torch.stack([results_slotFilling[i][indice_slot+k] for k in range(length_token) if indice_slot + k < len(results_slotFilling[i])]), dim=0)
+                frase.append(media)
+                contatore += length_token - 1 
+                indice_slot += length_token
+            else:
+                frase.append(results_slotFilling[i, indice_slot]) #We need to count how many tokens we need to add at the end of the sequence
+                indice_slot += 1
+        
+        num_padding = results_slotFilling.shape[1] - len(frase)
+        for l in range(num_padding):
+            frase.append(torch.zeros(shapeDim_1).to(device))
+            
+        newEntry = torch.stack(frase, dim=0)
+        results_slotFilling[i] = newEntry
+    
+    
+    results_slotFilling = results_slotFilling.permute(0,2,1)
+    return results_slotFilling
 
 def init_weights(mat):
     for m in mat.modules():

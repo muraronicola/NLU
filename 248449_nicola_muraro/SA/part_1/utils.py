@@ -148,6 +148,7 @@ class Slots (data.Dataset):
         self.utt_ids = self.mapping_seq(self.utterances, lang.word2id)
         self.slot_ids = self.mapping_seq(self.slots, lang.slot2id)
         
+        self.pad_slots()
         self.O_slot = lang.slot2id["O"]
         self.length_token_bert = self.getLengthBert(self.text_suddiviso, self.tokenizer)
         
@@ -155,7 +156,7 @@ class Slots (data.Dataset):
         return len(self.utterances)
 
     def __getitem__(self, idx):
-        utt = torch.Tensor(self.utt_ids[idx])
+        """ utt = torch.Tensor(self.utt_ids[idx])
         attention_mask = self.utt_tokenized['attention_mask'][idx]
         input_ids = self.utt_tokenized['input_ids'][idx]
         token_type_ids = self.utt_tokenized['token_type_ids'][idx]
@@ -167,8 +168,23 @@ class Slots (data.Dataset):
             slots = torch.cat((slots, torch.tensor([self.pad_token])))
         
         sample = {'text_suddiviso': self.text_suddiviso[idx],  'length_token_bert': self.length_token_bert, 'frase_testo':frase_testo, 'plain_text': utt, 'slots': slots, 'attention_mask': attention_mask, 'input_ids': input_ids, 'token_type_ids': token_type_ids, 'tokenizedUtterance': self.tokenizer.convert_ids_to_tokens(input_ids)}
+        """
         
+        utt = torch.Tensor(self.utt_ids[idx])
+        attention_mask = self.utt_tokenized['attention_mask'][idx]
+        input_ids = self.utt_tokenized['input_ids'][idx]
+        token_type_ids = self.utt_tokenized['token_type_ids'][idx]
+        
+        frase_testo = self.utterances[idx]
+        
+        sample = {'text_suddiviso': self.text_suddiviso[idx],  'length_token_bert': self.length_token_bert, 'frase_testo':frase_testo, 'plain_text': utt, 'slots': torch.Tensor(self.slot_ids[idx]), 'attention_mask': attention_mask, 'input_ids': input_ids, 'token_type_ids': token_type_ids, 'tokenizedUtterance': self.tokenizer.convert_ids_to_tokens(input_ids)}
+        #sample = {'input_ids': input_ids, 'attention_mask': attention_mask, 'token_type_ids': token_type_ids, "tokenizedUtterance": self.tokenizer.convert_ids_to_tokens(input_ids), 'utterance': utt, 'slots': torch.Tensor(self.slot_ids[idx]),  'frase_testo': frase_testo, 'length_token_bert': self.length_token_bert[frase_testo], 'text_suddiviso': self.text_suddiviso[idx]}
         return sample
+    
+    def pad_slots(self):
+        for slots in self.slot_ids:
+            for i in range(len(slots), len(self.utt_tokenized['attention_mask'][0]) - 1):
+                slots.append(self.pad_token)
     
     def getLengthBert(self, text_suddiviso, tokenizer):
         lengths = {}

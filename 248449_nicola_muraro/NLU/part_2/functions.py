@@ -39,15 +39,6 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
     return best_model.to(device)
 
 
-def get_input_bert(sample, device):
-    tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
-    tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
-    tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
-    tokenizedUtterance = sample['tokenizedUtterance']
-    
-    inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
-    return inputs_bert, tokenizedUtterance
-    
 
 def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang, device="cpu", clip=5): #Train the model one epoch 
     model.train()
@@ -59,6 +50,7 @@ def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang,
         
         inputs_bert, tokenizedUtterance = get_input_bert(sample, device)
         slots, intent = model(inputs_bert, tokenizedUtterance)
+        slots = pad_reshape_slots(slots, tokenizedUtterance, device)
         
         loss_intent = criterion_intents(intent, sample['intents'])
         loss_slot = criterion_slots(slots, sample['y_slots'])
@@ -98,6 +90,7 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
         for sample in data:
             inputs_bert, tokenizedUtterance = get_input_bert(sample, device)            
             slots, intents = model(inputs_bert, tokenizedUtterance)
+            slots = pad_reshape_slots(slots, tokenizedUtterance, device)
             
             loss_intent = criterion_intents(intents, sample['intents'])
             loss_slot = criterion_slots(slots, sample['y_slots'])
@@ -135,6 +128,42 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
         
     intent_results = classification_report(ref_intents, hyp_intents, zero_division=False, output_dict=True)
     return slot_results, intent_results, loss_array
+
+
+def get_input_bert(sample, device):
+    tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
+    tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
+    tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
+    tokenizedUtterance = sample['tokenizedUtterance']
+    
+    inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
+    return inputs_bert, tokenizedUtterance
+
+
+def pad_reshape_slots(results_slotFilling, tokenizedUtterance, device):
+    #We need to pad the sequences to have the same length
+    shapeDim_1 = results_slotFilling[0].shape[1]
+    
+    for i in range(results_slotFilling.shape[0]):
+        frase = []
+        contatore = 0
+        for j in range(results_slotFilling[i].shape[0]):
+            
+            token = tokenizedUtterance[i][j]
+            if "##" not in token and "'" not in token and "." not in token: #We need to check if the token is a special token
+                frase.append(results_slotFilling[i,j]) 
+            else:
+                contatore += 1 #We need to count how many tokens we need to add at the end of the sequence
+        
+        for l in range(contatore):
+            frase.append(torch.zeros(shapeDim_1).to(device))
+            
+        newEntry = torch.stack(frase, dim=0)
+        results_slotFilling[i] = newEntry
+        
+    results_slotFilling = results_slotFilling.permute(0,2,1)
+    
+    return results_slotFilling
 
 
 def init_weights(mat): # Function to initialize the weights of the model
