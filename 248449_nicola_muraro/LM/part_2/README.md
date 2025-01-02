@@ -1,5 +1,6 @@
 For executing the code, you can call it without any arguments.
 In this case, the code will train a model for each point of the assignment, and it will evaluate it.
+It will save the model as `best_model.pt` in the `bin` directory. If that file already exists, it will add a suffix to the name to avoid overwriting it.
 
 
 Still, there are some optional arguments that you can use to customize the execution of the code.
