@@ -1,5 +1,6 @@
-(nlu24) nicola@nicola-Z590-AORUS-ULTRA:~/Scrivania/NLU/git/NLU$ ./script_test.sh 
+(nlu24) nicola@nicola-Z590-AORUS-ULTRA:~/Scrivania/NLU/git/NLU$ time ./script_test.sh
 \n\nLM part 1
+\nFirst execution
 
 Results of the best save model:
 Train:	PPL 39.4	loss 3.67
@@ -11,17 +12,18 @@ Test:	PPL 111.08	loss 4.71
 
 
 
-real	0m8,713s
-user	0m8,664s
-sys	0m1,284s
+real	0m8,525s
+user	0m8,469s
+sys	0m1,283s
+\nSecond execution
 Starting experiment 1...
 
-PPL: 149.582121:  10%|████▋                                          | 10/99 [02:26<21:41, 14.62s/it]
+PPL: 152.058084:  10%|███████████▎                                                                                                    | 10/99 [02:23<21:15, 14.33s/it]
 
 Results of experiment 1:
-Train:	PPL 66.98	loss 4.2
-Dev:	PPL 143.73	loss 4.97
-Test:	PPL 138.26	loss 4.93
+Train:	PPL 67.43	loss 4.21
+Dev:	PPL 145.57	loss 4.98
+Test:	PPL 140.63	loss 4.95
 
 
 --------------------------------------------------
@@ -29,12 +31,12 @@ Test:	PPL 138.26	loss 4.93
 
 Starting experiment 2...
 
-PPL: 118.044824:  29%|█████████████▊                                 | 29/99 [06:32<15:46, 13.53s/it]
+PPL: 117.577470:  32%|████████████████████████████████████▏                                                                           | 32/99 [07:31<15:44, 14.10s/it]
 
 Results of experiment 2:
-Train:	PPL 50.89	loss 3.93
-Dev:	PPL 117.49	loss 4.77
-Test:	PPL 112.87	loss 4.73
+Train:	PPL 47.99	loss 3.87
+Dev:	PPL 116.22	loss 4.76
+Test:	PPL 112.2	loss 4.72
 
 
 --------------------------------------------------
@@ -42,12 +44,12 @@ Test:	PPL 112.87	loss 4.73
 
 Starting experiment 3...
 
-PPL: 122.602669:  13%|██████▏                                        | 13/99 [03:22<22:22, 15.61s/it]
+PPL: 125.078528:  14%|███████████████▊                                                                                                | 14/99 [03:37<22:03, 15.57s/it]
 
 Results of experiment 3:
-Train:	PPL 46.24	loss 3.83
-Dev:	PPL 121.42	loss 4.8
-Test:	PPL 114.32	loss 4.74
+Train:	PPL 40.84	loss 3.71
+Dev:	PPL 121.68	loss 4.8
+Test:	PPL 112.75	loss 4.73
 
 
 --------------------------------------------------
@@ -57,51 +59,54 @@ Test:	PPL 114.32	loss 4.74
 --------------------------------------------------
 --------------------------------------------------
 
-The best model is the second model, with a dev PPL of 117.49353572259682
+The best model is the second model, with a dev PPL of 116.22007264792747
 
 --------------------------------------------------
 --------------------------------------------------
 
-real	12m43,526s
-user	12m47,077s
-sys	0m2,123s
+real	13m54,640s
+user	13m58,289s
+sys	0m2,541s
+\nThird execution
 
 Results of the best save model:
-Train:	PPL 50.89	loss 3.93
-Dev:	PPL 117.49	loss 4.77
-Test:	PPL 112.87	loss 4.73
+Train:	PPL 47.99	loss 3.87
+Dev:	PPL 116.22	loss 4.76
+Test:	PPL 112.2	loss 4.72
 
 
 --------------------------------------------------
 
 
 
-real	0m8,545s
-user	0m8,535s
-sys	0m1,332s
+real	0m8,697s
+user	0m8,676s
+sys	0m1,286s
 \n\nLM part 2
+\nFirst execution
 
 Results of the best save model:
-Train:	PPL 50.22	loss 3.92
-Dev:	PPL 128.57	loss 4.86
-Test:	PPL 125.89	loss 4.84
+Train:	PPL 49.98	loss 3.91
+Dev:	PPL 128.1	loss 4.85
+Test:	PPL 126.25	loss 4.84
 
 
 --------------------------------------------------
 
 
 
-real	0m9,158s
-user	0m9,056s
-sys	0m1,327s
+real	0m9,345s
+user	0m9,143s
+sys	0m1,259s
+\nSecond execution
 Starting experiment 1...
 
-PPL: 137.502331:  20%|█████████▍                                     | 20/99 [05:11<20:30, 15.57s/it]
+PPL: 135.104302:  20%|██████████████████████▋                                                                                         | 20/99 [05:25<21:26, 16.29s/it]
 
 Results of experiment 1:
-Train:	PPL 72.33	loss 4.28
-Dev:	PPL 133.41	loss 4.89
-Test:	PPL 130.21	loss 4.87
+Train:	PPL 72.83	loss 4.29
+Dev:	PPL 131.75	loss 4.88
+Test:	PPL 129.45	loss 4.86
 
 
 --------------------------------------------------
@@ -109,12 +114,12 @@ Test:	PPL 130.21	loss 4.87
 
 Starting experiment 2...
 
-PPL: 134.070493:  26%|████████████▎                                  | 26/99 [06:42<18:48, 15.46s/it]
+PPL: 132.103866:  23%|██████████████████████████                                                                                      | 23/99 [06:16<20:43, 16.36s/it]
 
 Results of experiment 2:
-Train:	PPL 61.62	loss 4.12
-Dev:	PPL 132.56	loss 4.89
-Test:	PPL 130.4	loss 4.87
+Train:	PPL 69.95	loss 4.25
+Dev:	PPL 131.76	loss 4.88
+Test:	PPL 130.15	loss 4.87
 
 
 --------------------------------------------------
@@ -122,15 +127,15 @@ Test:	PPL 130.4	loss 4.87
 
 Starting experiment 3...
 
-PPL: 141.689468:  15%|███████                                        | 15/99 [03:43<20:55, 14.9PPL: 137.881451:  15%|███████                                        | 15/99 [03:58<20:55, 14.9PPL: 137.881451:  16%|███████▌                                       | 16/99 [03:58<20:45, 15.0PPL: 135.680856:  16%|███████▌                                       | 16/99 [04:13<20:45, 15.0PPL: 135.680856:  17%|████████                                       | 17/99 [04:13<20:29, 15.0PPL: 135.397974:  17%|████████                                       | 17/99 [04:28<20:29, 15.0PPL: 135.397974:  18%|████████▌                                      | 18/99 [04:28<20:13, 14.9PPL: 134.214208:  18%|████████▌                                      | 18/99 [04:43<20:13, 14.9PPL: 134.214208:  19%|█████████                                      | 19/99 [04:43<19:57, 14.9PPL: 133.230635:  19%|█████████                                      | 19/99 [04:58<19:57, 14.9PPL: 133.230635:  20%|█████████▍                                     | 20/99 [04:58<19:41, 14.9PPL: 131.710923:  20%|█████████▍                                     | 20/99 [05:13<19:41, 14.9PPL: 131.710923:  21%|█████████▉                                     | 21/99 [05:13<19:25, 14.9PPL: 133.581566:  21%|█████████▉                                     | 21/99 [05:28<19:25, 14.9PPL: 133.581566:  22%|██████████▍                                    | 22/99 [05:28<19:09, 14.9PPL: 131.453314:  22%|██████████▍                                    | 22/99 [05:43<19:09, 14.9PPL: 131.453314:  23%|██████████▉                                    | 23/99 [05:43<18:53, 14.9PPL: 133.932214:  23%|██████████▉                                    | 23/99 [05:57<18:53, 14.9PPL: 133.932214:  24%|███████████▍                                   | 24/99 [05:57<18:37, 14.9PPL: 131.191120:  24%|███████████▍                                   | 24/99 [06:12<18:37, 14.9PPL: 131.191120:  25%|███████████▊                                   | 25/99 [06:12<18:23, 14.9PPL: 133.176261:  25%|███████████▊                                   | 25/99 [06:27<18:23, 14.9PPL: 133.176261:  26%|████████████▎                                  | 26/99 [06:27<18:08, 14.92s/it]Now using ASGD, epoch 27
-PPL: 133.955729:  26%|████████████▎                                  | 26/99 [06:42<18:08, 14.9PPL: 133.955729:  27%|████████████▊                                  | 27/99 [06:42<17:54, 14.92s/it]/home/nicola/anaconda3/envs/nlu24/lib/python3.10/site-packages/torch/nn/modules/rnn.py:878: UserWarning: RNN module weights are not part of single contiguous chunk of memory. This means they need to be compacted at every call, possibly greatly increasing memory usage. To compact weights again call flatten_parameters(). (Triggered internally at ../aten/src/ATen/native/cudnn/RNN.cpp:982.)
+PPL: 131.998685:  25%|████████████████████████████▎                                                                                   | 25/99 [06:30<18:34, 15.06s/it]Now using ASGD, epoch 26
+PPL: 132.871899:  26%|█████████████████████████████▍                                                                                  | 26/99 [06:45<18:18, 15.04s/it]/home/nicola/anaconda3/envs/nlu24/lib/python3.10/site-packages/torch/nn/modules/rnn.py:878: UserWarning: RNN module weights are not part of single contiguous chunk of memory. This means they need to be compacted at every call, possibly greatly increasing memory usage. To compact weights again call flatten_parameters(). (Triggered internally at ../aten/src/ATen/native/cudnn/RNN.cpp:982.)
   result = _VF.lstm(input, hx, self._flat_weights, self.bias, self.num_layers,
-PPL: 127.403208:  27%|████████████▊                                  | 27/99 [06:58<17:54, 14.9PPL: 127.403208:  28%|█████████████▎                                 | 28/99 [06:58<18:04, 15.2PPL: 127.292835:  28%|█████████████▎                                 | 28/99 [07:15<18:04, 15.2PPL: 127.292835:  29%|█████████████▊                                 | 29/99 [07:15<18:08, 15.5PPL: 127.901502:  29%|█████████████▊                                 | 29/99 [07:31<18:08, 15.5PPL: 127.901502:  30%|██████████████▏                                | 30/99 [07:31<18:05, 15.7PPL: 129.001619:  30%|██████████████▏                                | 30/99 [07:47<18:05, 15.7PPL: 129.001619:  31%|██████████████▋                                | 31/99 [07:47<18:00, 15.8PPL: 129.138937:  31%|██████████████▋                                | 31/99 [08:03<18:00, 15.8PPL: 129.138937:  31%|██████████████▋                                | 31/99 [08:03<17:40, 15.60s/it]
+PPL: 127.813721:  29%|████████████████████████████████▊                                                                               | 29/99 [07:50<18:56, 16.24s/it]
 
 Results of experiment 3:
-Train:	PPL 46.47	loss 3.84
-Dev:	PPL 127.29	loss 4.85
-Test:	PPL 125.68	loss 4.83
+Train:	PPL 49.13	loss 3.89
+Dev:	PPL 126.01	loss 4.84
+Test:	PPL 122.74	loss 4.81
 
 
 --------------------------------------------------
@@ -140,29 +145,31 @@ Test:	PPL 125.68	loss 4.83
 --------------------------------------------------
 --------------------------------------------------
 
-The best model is the third model, with a dev PPL of 127.29284334285722
+The best model is the third model, with a dev PPL of 126.01387236689186
 
 --------------------------------------------------
 --------------------------------------------------
 
-real	20m21,047s
-user	20m26,861s
-sys	0m3,325s
+real	19m57,954s
+user	20m3,532s
+sys	0m4,724s
+\nThird execution
 
 Results of the best save model:
-Train:	PPL 47.44	loss 3.86
-Dev:	PPL 129.07	loss 4.86
-Test:	PPL 126.8	loss 4.84
+Train:	PPL 50.56	loss 3.92
+Dev:	PPL 127.44	loss 4.85
+Test:	PPL 124.41	loss 4.82
 
 
 --------------------------------------------------
 
 
 
-real	0m9,217s
-user	0m9,188s
-sys	0m1,332s
+real	0m9,330s
+user	0m9,326s
+sys	0m1,317s
 \n\nNLU part 1
+\nFirst execution
 
 Results of the best model:
 Slot F1 0.941
@@ -173,16 +180,17 @@ Intent Acc 0.948
 
 
 
-real	0m2,458s
-user	0m2,203s
-sys	0m2,267s
+real	0m2,235s
+user	0m2,314s
+sys	0m2,179s
+\nSecond execution
 Starting experiment 1...
 
-100%|████████████████████████████████████████████████████████████| 5/5 [03:33<00:00, 42.69s/it]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 5/5 [03:33<00:00, 42.75s/it]
 
 Results of experiment 1:
-Slot F1 0.939 +- 0.003
-Intent Acc 0.944 +- 0.003
+Slot F1 0.939 +- 0.004
+Intent Acc 0.945 +- 0.004
 
 
 --------------------------------------------------
@@ -190,10 +198,10 @@ Intent Acc 0.944 +- 0.003
 
 Starting experiment 2...
 
-100%|████████████████████████████████████████████████████████████| 5/5 [04:47<00:00, 57.49s/it]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 5/5 [07:18<00:00, 87.61s/it]
 
 Results of experiment 2:
-Slot F1 0.941 +- 0.002
+Slot F1 0.946 +- 0.002
 Intent Acc 0.955 +- 0.002
 
 
@@ -204,35 +212,30 @@ Intent Acc 0.955 +- 0.002
 --------------------------------------------------
 --------------------------------------------------
 
-The best model is the second model, with a dev slot f1 of 0.941
+The best model is the second model, with a dev slot f1 of 0.946
 
 --------------------------------------------------
 --------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nicola/Scrivania/NLU/git/NLU/248449_nicola_muraro/NLU/part_1/./main.py", line 105, in <module>
-    save_best_model(best_model, lang, "./bin/")
-  File "/home/nicola/Scrivania/NLU/git/NLU/248449_nicola_muraro/NLU/part_1/functions.py", line 156, in save_best_model
-    saving_object = {"state_dict": best_model.state_dict(), "lang": lang}
-AttributeError: 'tuple' object has no attribute 'state_dict'
 
-real	8m22,932s
-user	8m16,221s
-sys	0m3,604s
-Traceback (most recent call last):
-  File "/home/nicola/Scrivania/NLU/git/NLU/248449_nicola_muraro/NLU/part_1/./main.py", line 110, in <module>
-    saved_info = torch.load(model_path_eval)
-  File "/home/nicola/anaconda3/envs/nlu24/lib/python3.10/site-packages/torch/serialization.py", line 998, in load
-    with _open_file_like(f, 'rb') as opened_file:
-  File "/home/nicola/anaconda3/envs/nlu24/lib/python3.10/site-packages/torch/serialization.py", line 445, in _open_file_like
-    return _open_file(name_or_buffer, mode)
-  File "/home/nicola/anaconda3/envs/nlu24/lib/python3.10/site-packages/torch/serialization.py", line 426, in __init__
-    super().__init__(open(name, mode))
-FileNotFoundError: [Errno 2] No such file or directory: './bin/best_model_0.pt'
+real	10m53,886s
+user	10m46,636s
+sys	0m4,239s
+\nThird execution
 
-real	0m1,131s
-user	0m1,276s
-sys	0m2,132s
+Results of the best model:
+Slot F1 0.947
+Intent Acc 0.953
+
+
+--------------------------------------------------
+
+
+
+real	0m2,230s
+user	0m2,295s
+sys	0m2,204s
 \n\nNLU part 2
+\nFirst execution
 
 Results of the experiment:
 Slot F1 0.927
@@ -243,53 +246,84 @@ Intent Acc 0.968
 
 
 
-real	0m14,080s
-user	0m12,527s
-sys	0m3,247s
+real	0m13,747s
+user	0m12,525s
+sys	0m3,006s
+\nSecond execution
 Starting experiment...
 
-F1: 0.963770:  49%|████████████████████▉                      | 97/199 [36:29<38:22, 22.57s/it]
+F1: 0.961346:  50%|████████████████████████████████████████████████████████▋                                                         | 99/199 [37:07<37:30, 22.50s/it]
 
 Results of the experiment:
-Slot F1 0.931
-Intent Acc 0.955
+Slot F1 0.938
+Intent Acc 0.962
 
 
 --------------------------------------------------
 
 
 
-real	36m43,643s
-user	36m39,761s
-sys	0m4,703s
+real	37m21,476s
+user	37m19,127s
+sys	0m4,035s
+\nThird execution
 
 Results of the experiment:
-Slot F1 0.931
-Intent Acc 0.955
+Slot F1 0.938
+Intent Acc 0.962
 
 
 --------------------------------------------------
 
 
 
-real	0m12,686s
-user	0m11,911s
-sys	0m2,597s
-./script_test.sh: riga 42: cd: ./SA/part1/: File o directory non esistente
+real	0m12,606s
+user	0m12,008s
+sys	0m2,381s
 \n\nSA part 1
-python3: can't open file '/home/nicola/Scrivania/NLU/git/NLU/248449_nicola_muraro/./main.py': [Errno 2] No such file or directory
+\nFirst execution
 
-real	0m0,009s
-user	0m0,007s
-sys	0m0,001s
-python3: can't open file '/home/nicola/Scrivania/NLU/git/NLU/248449_nicola_muraro/./main.py': [Errno 2] No such file or directory
+Results of the experiment:
+Slot F1 0.59
 
-real	0m0,008s
-user	0m0,005s
-sys	0m0,003s
-python3: can't open file '/home/nicola/Scrivania/NLU/git/NLU/248449_nicola_muraro/./main.py': [Errno 2] No such file or directory
 
-real	0m0,008s
-user	0m0,006s
-sys	0m0,002s
-(nlu24) nicola@nicola-Z590-AORUS-ULTRA:~/Scrivania/NLU/git/NLU$ 
+--------------------------------------------------
+
+
+
+real	0m20,175s
+user	0m18,901s
+sys	0m2,788s
+\nSecond execution
+Starting experiment...
+
+F1: 0.612526:  10%|███████████▍                                                                                                      | 20/199 [06:35<59:01, 19.78s/it]
+
+Results of the experiment:
+Slot F1 0.568
+
+
+--------------------------------------------------
+
+
+
+real	6m56,986s
+user	6m55,422s
+sys	0m3,113s
+\nThird execution
+
+Results of the experiment:
+Slot F1 0.568
+
+
+--------------------------------------------------
+
+
+
+real	0m19,845s
+user	0m19,005s
+sys	0m2,539s
+
+real	90m51,684s
+user	90m45,669s
+sys	0m38,901s
