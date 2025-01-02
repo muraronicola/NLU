@@ -39,6 +39,16 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, criteri
     return best_model.to(device)
 
 
+def get_input_bert(sample, device):
+    tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
+    tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
+    tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
+    tokenizedUtterance = sample['tokenizedUtterance']
+    
+    inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
+    return inputs_bert, tokenizedUtterance
+    
+
 def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang, device="cpu", clip=5): #Train the model one epoch 
     model.train()
     loss_array = []
@@ -47,13 +57,7 @@ def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang,
         
         optimizer.zero_grad() # Zeroing the gradient
         
-        tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
-        tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
-        tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
-        tokenizedUtterance = sample['tokenizedUtterance']
-        
-        inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids} # Create the input dictionary to pass to BERT
-        
+        inputs_bert, tokenizedUtterance = get_input_bert(sample, device)
         slots, intent = model(inputs_bert, tokenizedUtterance)
         
         loss_intent = criterion_intents(intent, sample['intents'])
@@ -92,22 +96,13 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
     
     with torch.no_grad(): # It used to avoid the creation of computational graph
         for sample in data:
-            
-            tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
-            tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
-            tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
-            tokenizedUtterance = sample['tokenizedUtterance']
-            
-            inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
-            
-            
+            inputs_bert, tokenizedUtterance = get_input_bert(sample, device)            
             slots, intents = model(inputs_bert, tokenizedUtterance)
             
             loss_intent = criterion_intents(intents, sample['intents'])
             loss_slot = criterion_slots(slots, sample['y_slots'])
             combined_loss = loss_intent*0.1 + loss_slot*0.9 #In joint training we sum the losses.
             loss_array.append(combined_loss.item())
-            
             
             # Intent inference
             # Get the highest probable class
