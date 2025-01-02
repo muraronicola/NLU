@@ -4,7 +4,7 @@ import pandas as pd
 
 
 if __name__ == '__main__':
-    indice_rete = 2
+    indice_rete = 1
     data = pd.read_csv('./data/network_' + str(indice_rete) + '.csv')
     fig1 = plt.figure(figsize=(7, 4))
     ax = fig1.add_subplot(111)

@@ -17,11 +17,11 @@
 \section{Introduction}
 This last assignment is about the task of aspect-based sentiment analysis.
 In this type of task, we generally aim to identify the polarity that each token has within the sentence. However, in our case, we focused on a slightly simpler task: the extraction of terms within the sentence, ignoring the part involving the prediction of their polarity.
-To achieve this, we once again started by using a pre-trained language model. For this part we used BERT also in this case. We then performed fine-tuning of this model to align the architecture’s predictions with our specific use case.
+To achieve this, we once again started by using a pre-trained language model. We used BERT also in this case. We then performed fine-tuning of this model to align the architecture’s predictions with our specific use case.
 
 \section{Implementation details}
 The type of architecture used for this assignment is comparable to the one I previously developed for the slot filling and intent classification tasks.
-Here as well, we used BERT as the foundation to obtain a latent representation, which is subsequently passed through a dropout layer and finally processed by a fully connected layer to predict the type of term. Of course, the fine-tuning was performed on this entire structure, using the Laptop partition of the SemEval2014 Task 4 dataset.
+Here as well, we used BERT as the foundation to obtain a latent representation, which is subsequently passed through a dropout layer and finally processed by a fully connected layer to predict the type of term. The fine-tuning was performed on this entire structure, using the Laptop partition of the SemEval2014 Task 4 dataset.
 
 Consequently, as a starting point for this implementation, I used the code developed in the previous assignment, making some modifications to adapt it to this specific task.
 Additionally, my implementation was carried out following the guidelines provided in the paper by Hu et al. \cite{hu2019opendomaintargetedsentimentanalysis}.
@@ -49,7 +49,7 @@ The best architecture in this case consists of bert-base-uncased with a dropout 
     \hline
     \textbf{Model} & \textbf{Slot F1} \\
     \hline
-    IAS + dropout & 60.922 \\
+    IAS + dropout & 0.60 \\
     \hline
   \end{tabular}
   \caption{Results for the best configuration. The values shown are obtained on the test set}
