@@ -1,0 +1,73 @@
+
+(nlu24) nicola@nicola-Z590-AORUS-ULTRA:~/Scrivania/NLU/git/NLU$ ./script_test_eval_only.sh 
+\n\nLM part 1
+
+Results of the best save model:
+Train:  PPL 39.4        loss 3.67
+Dev:    PPL 115.45      loss 4.75
+Test:   PPL 111.08      loss 4.71
+
+
+--------------------------------------------------
+
+
+
+real    0m9,874s
+user    0m8,439s
+sys     0m1,427s
+\n\nLM part 2
+
+Results of the best save model:
+Train:  PPL 50.17       loss 3.92
+Dev:    PPL 128.19      loss 4.85
+Test:   PPL 126.09      loss 4.84
+
+
+--------------------------------------------------
+
+
+
+real    0m9,170s
+user    0m9,107s
+sys     0m1,214s
+\n\nNLU part 1
+
+Results of the best model:
+Slot F1 0.941
+Intent Acc 0.948
+
+
+--------------------------------------------------
+
+
+
+real    0m2,431s
+user    0m2,238s
+sys     0m2,170s
+\n\nNLU part 2
+
+Results of the experiment:
+Slot F1 0.927
+Intent Acc 0.968
+
+
+--------------------------------------------------
+
+
+
+real    0m14,096s
+user    0m12,533s
+sys     0m3,155s
+\n\nSA part 1
+
+Results of the experiment:
+Slot F1 0.59
+
+
+--------------------------------------------------
+
+
+
+real    0m20,581s
+user    0m19,321s
+sys     0m2,751s
