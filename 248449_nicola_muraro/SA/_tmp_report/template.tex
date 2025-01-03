@@ -29,6 +29,8 @@ Additionally, my implementation was carried out following the guidelines provide
 First, I tokenized the input using the BertTokenizer. Subsequently, it is necessary to align those tokens that have been split into multiple subtokens. If a word is tokenized into multiple subtokens, I use the first subtoken to predict the term type for the entire original word. This is necessary to maintain consistency between the model’s output and the ground truth in the dataset, enabling the performance calculation later on.
 
 Next, I take this preprocessed input and pass it to the model. The input flows through the architecture, and the final output consists of two possible labels: T (if the token is a term) or O (if it is irrelevant for our task).
+Also in this assignement, it was necessary to align the output that the model generates (for each token), with the ground truth (that uses word-level annotations). 
+
 
 To evaluate the model’s performance, I relied on the eval.py script proposed in the paper by Xin et al. \cite{li2019unifiedmodelopiniontarget}.
 I made some modifications to align my model’s predictions with the evaluation function. To do this, I used another function (also provided in the same paper) that converts the labels outputted by my model into labels compatible with the Opinion Target Extraction task. This step was necessary because the evaluation function uses this specific label convention to compute the model’s performance.
