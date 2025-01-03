@@ -32,7 +32,7 @@ This kind of implementation was detailed in the paper written by Chen et al. \ci
 First, the utterance was tokenized using a tokenizer specific to BERT: the BertTokenizer.
 Additionally, BERT requires all input utterances to have the same length. Consequently, I added padding to the utterances and slots to ensure uniform length, making them comparable for metric computation and performance evaluation of the created model.
 Then, when using the model, the utterance (already tokenized and padded) is passed as input to BERT, which generates an embedding for the provided input. This hidden state is passed through a dropout layer and used as input for both projection heads. The first token in the sequence is utilized by one prediction head to predict the intent, while the remaining tokens are fed into the other prediction head to perform slot filling.
-For the slot filling task, it was also necessary to align the output that the model generates (for each token), with the ground truth (that uses word-level annotations). 
+For the slot filling task, it was also necessary to align the output that the model generates, with the ground truth. This is due to the fact that the tokenizer used by BERT splits the words in subtokens, while the ground truth is based on the original words. 
 
 \section{Results}
 As in the previous assignment, I used the validation set to adjust the hyperparameters, ignoring their impact on the test set. This approach allows the test set to be evaluated only at the end, providing more reliable performance metrics for the model.

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.5.25)  3 JAN 2025 14:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.5.25)  3 JAN 2025 15:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -287,7 +287,7 @@ ocal/texlive/2024/texmf-dist/fonts/enc/dvips/base/8r.enc}
 
 
  <./images/plot_1_loss.png>]
-<./images/plot_2_loss.png, id=16, 505.89pt x 289.08pt>
+<./images/plot_2_loss.png, id=15, 505.89pt x 289.08pt>
 File: ./images/plot_2_loss.png Graphic file (type png)
 <use ./images/plot_2_loss.png>
 Package pdftex.def Info: ./images/plot_2_loss.png  used on input line 92.
@@ -315,7 +315,7 @@ sr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr
 exlive/2024/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/202
 4/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-di
 st/fonts/type1/urw/times/utmri8a.pfb>
-Output written on template.pdf (2 pages, 128801 bytes).
+Output written on template.pdf (2 pages, 128906 bytes).
 PDF statistics:
  52 PDF objects out of 1000 (max. 8388607)
  29 compressed objects within 1 object stream
