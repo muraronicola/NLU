@@ -56,7 +56,7 @@ def train_loop(data, optimizer, criterion_slots, model, device="cpu", clip=5): #
         inputs_bert = get_input_bert(sample, device)
         
         slots = model(inputs_bert)
-        slots = pad_reshape_slots(slots, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'], device)
+        slots = align_slots(slots, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'], device)
         
         loss = criterion_slots(slots, sample['y_slots'])
         loss_array.append(loss.item())
@@ -89,7 +89,7 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
             inputs_bert = get_input_bert(sample, device)
             
             slots = model(inputs_bert)
-            slots = pad_reshape_slots(slots, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'], device)
+            slots = align_slots(slots, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'], device)
             
             loss = criterion_slots(slots, sample['y_slots'])
             loss_array.append(loss.item())
@@ -129,7 +129,7 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
     return f1_score, loss_array
 
 
-def get_input_bert(sample, device):
+def get_input_bert(sample, device): #Get the input for the BERT model
     tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
     tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
     tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
@@ -138,7 +138,7 @@ def get_input_bert(sample, device):
     return inputs_bert
 
 
-def pad_reshape_slots(results_slotFilling, frase_testo, text_suddiviso, length_token_bert, device):
+def align_slots(results_slotFilling, frase_testo, text_suddiviso, length_token_bert, device): #Align the slots with the original text
     #We need to pad the sequences to have the same length
     shapeDim_1 = results_slotFilling[0].shape[1]
     

@@ -49,8 +49,8 @@ def train_loop(data, optimizer, criterion_slots, criterion_intents, model, lang,
         optimizer.zero_grad() # Zeroing the gradient
         
         inputs_bert, tokenizedUtterance = get_input_bert(sample, device)
-        slots, intent = model(inputs_bert, tokenizedUtterance)
-        slots = pad_reshape_slots(slots, tokenizedUtterance, device)
+        slots, intent = model(inputs_bert)
+        slots = align_slots(slots, tokenizedUtterance, device)
         
         loss_intent = criterion_intents(intent, sample['intents'])
         loss_slot = criterion_slots(slots, sample['y_slots'])
@@ -89,8 +89,8 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
     with torch.no_grad(): # It used to avoid the creation of computational graph
         for sample in data:
             inputs_bert, tokenizedUtterance = get_input_bert(sample, device)            
-            slots, intents = model(inputs_bert, tokenizedUtterance)
-            slots = pad_reshape_slots(slots, tokenizedUtterance, device)
+            slots, intents = model(inputs_bert)
+            slots = align_slots(slots, tokenizedUtterance, device)
             
             loss_intent = criterion_intents(intents, sample['intents'])
             loss_slot = criterion_slots(slots, sample['y_slots'])
@@ -130,7 +130,7 @@ def eval_loop(data, criterion_slots, criterion_intents, model, lang, device="cpu
     return slot_results, intent_results, loss_array
 
 
-def get_input_bert(sample, device):
+def get_input_bert(sample, device): #Function to get the input for the BERT model
     tensor_input_ids = torch.Tensor(sample['input_ids']).to(device).to(torch.int64)
     tensor_attention_mask = torch.Tensor(sample['attention_mask']).to(device).to(torch.int64)
     tensor_token_type_ids = torch.Tensor(sample['token_type_ids']).to(device).to(torch.int64)
@@ -140,7 +140,7 @@ def get_input_bert(sample, device):
     return inputs_bert, tokenizedUtterance
 
 
-def pad_reshape_slots(results_slotFilling, tokenizedUtterance, device):
+def align_slots(results_slotFilling, tokenizedUtterance, device): #Align the slots with the original text
     #We need to pad the sequences to have the same length
     shapeDim_1 = results_slotFilling[0].shape[1]
     

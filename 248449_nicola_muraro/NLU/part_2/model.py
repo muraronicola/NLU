@@ -17,7 +17,7 @@ class ModelIAS(nn.Module):
         self.__device = device
     
     
-    def forward(self, utterance, tokenizedUtterance):
+    def forward(self, utterance):
         predictionBert = self.bert(**utterance) #Get the output of the pretrained model
         
         last_hidden_states = predictionBert.last_hidden_state

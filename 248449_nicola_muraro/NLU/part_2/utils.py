@@ -136,33 +136,14 @@ class IntentsAndSlots (data.Dataset):  # This class will be used to handle the d
 
     def __getitem__(self, idx):
         utt = torch.Tensor(self.utt_ids[idx])
-        
-        """
         attention_mask = self.utt_tokenized['attention_mask'][idx]
         input_ids = self.utt_tokenized['input_ids'][idx]
         token_type_ids = self.utt_tokenized['token_type_ids'][idx]
-        
-        frase_testo = self.utterances[idx]
-        
-        slots = torch.Tensor(self.slot_ids[idx])
-        for i in range(len(slots), len(attention_mask) - 1):
-            slots = torch.cat((slots, torch.tensor([self.pad_token])))
-        
-        intent = self.intent_ids[idx]
-        sample = {'frase_testo':frase_testo, 'utterance': utt, 'slots': slots, 'intent': intent, 'attention_mask': attention_mask, 'input_ids': input_ids, 'token_type_ids': token_type_ids, 'tokenizedUtterance': self.tokenizer.convert_ids_to_tokens(input_ids)}
-        """
-        attention_mask = self.utt_tokenized['attention_mask'][idx]
-        input_ids = self.utt_tokenized['input_ids'][idx]
-        token_type_ids = self.utt_tokenized['token_type_ids'][idx]
-        
-        """ slots = torch.Tensor(self.slot_ids[idx])
-        for i in range(len(slots), len(attention_mask) - 1):
-            slots = torch.cat((slots, torch.tensor([self.pad_token])))"""
         
         sample = {'input_ids': input_ids, 'attention_mask': attention_mask, 'token_type_ids': token_type_ids, "tokenizedUtterance": self.tokenizer.convert_ids_to_tokens(input_ids), 'utterance': utt, 'slots': torch.Tensor(self.slot_ids[idx]), 'intent': self.intent_ids[idx]}
         return sample
     
-    def pad_slots(self):
+    def pad_slots(self): #Pad the slots to the maximum length of the utterances
         for slots in self.slot_ids:
             for i in range(len(slots), len(self.utt_tokenized['attention_mask'][0]) - 1):
                 slots.append(self.pad_token)
