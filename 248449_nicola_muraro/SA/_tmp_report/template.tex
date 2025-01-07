@@ -26,7 +26,7 @@ Here as well, we used BERT as the foundation to obtain a latent representation, 
 Consequently, as a starting point for this implementation, I used the code developed in the previous assignment, making some modifications to adapt it to this specific task.
 Additionally, my implementation was carried out following the guidelines provided in the paper by Hu et al. \cite{hu2019opendomaintargetedsentimentanalysis}.
 
-First, I tokenized the input using the BertTokenizer. Subsequently, it is necessary to align those tokens that have been split into multiple subtokens. If a word is tokenized into multiple subtokens, I use the first subtoken to predict the term type for the entire original word. This is necessary to maintain consistency between the model’s output and the ground truth in the dataset, enabling the performance calculation later on.
+First, I tokenized the input using the BertTokenizer, adding alos some padding. This was done to ensure that all the input sequences have the same length.
 
 Next, I take this preprocessed input and pass it to the model. The input flows through the architecture, and the final output consists of two possible labels: T (if the token is a term) or O (if it is irrelevant for our task).
 Also in this assignement, in order to evaluate the model, it was necessary to align the model’s output with the dataset’s labels. This is due to the fact that the ground truth are obtained using the tokenizer from nltk, which splits the utterance in a different way compared to the BertTokenizer.
