@@ -38,11 +38,13 @@ For the slot filling task, it was also necessary to align the output that the mo
 As in the previous assignment, I used the validation set to adjust the hyperparameters, ignoring their impact on the test set. This approach allows the test set to be evaluated only at the end, providing more reliable performance metrics for the model.
 
 For all the results reported below, I used the Adam optimizer with a learning rate of \(lr = 0.0001\). Additionally, the batch sizes for the train and test sets remained unchanged at \(64\) and \(128\), respectively.
+\newline
 
 For the first part of the assignment, adding both bidirectionality and dropout layers improved the proposed model’s performance, as shown in Table \ref{tab:results1}. 
 Figure \ref{fig:fig1} also provides a visualization of the model's training dynamics. From there we can observe that the model behaves well, with a clear decreasing trend in the loss function on both sets of data.
 Specifically, I empirically found that applying dropout both after the utterance embedding and before the two prediction heads yielded the best results.
 The configuration used for this part was: \(emb \textunderscore size=300, hid \textunderscore size=200\).
+The loss was set as the weighted average of the loss for intents and slots, I empirically determined that the best combination was: \(combined \textunderscore loss = loss \textunderscore intent * 0.1 + loss \textunderscore slot * 0.9\).
 For each test, \(5\) runs were performed, and the resulting values were averaged.
 
 
@@ -68,7 +70,7 @@ For each test, \(5\) runs were performed, and the resulting values were averaged
 \end{figure}
 
 In the second part, the input size for the two prediction heads had to match the dimension of BERT’s last hidden state. Due to this fact, both were set to 768.
-The loss also in this case was a weighted average of the loss for intents and slots. I empirically determined that the best combination was: \(combined \textunderscore loss = loss \textunderscore intent * 0.1 + loss \textunderscore slot * 0.9\).
+Also in this case the loss was a weighted average of the loss for intents and slots as specified above. 
 The performance of this model was evaluated over a single run because the training time for this type of architecture is significantly higher compared to the first one. The results are shown in Table \ref{tab:results2}, while Figure \ref{fig:fig2} illustrates the training dynamics of the model.
 As we can see, in the beginning of the train the loss is very high, but after a few epochs it starts to decrease rapidly. This is probably due to the fact that the backbone needs some time to adapt to the new tasks, and then it starts to perform well.
 
