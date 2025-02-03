@@ -7,14 +7,14 @@ import numpy as np
 import os
 from torch import optim
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experiment_number, criterion_train, criterion_eval, device="cpu", n_epochs=100, clip=5, ASGD_lr=2.5, n_nonmono=5, nonmono_ASGD=False):
+def execute_experiment(model, train_loader, dev_loader, optimizer, scheduler, experiment_number, criterion_train, criterion_eval, device="cpu", n_epochs=100, clip=5, ASGD_lr=2.5, n_nonmono=5, nonmono_ASGD=False):
     print("Starting experiment " + str(experiment_number) + "...\n")
     
     best_model = copy.deepcopy(model).to('cpu')
     best_ppl = math.inf
     pbar = tqdm(range(1, n_epochs))
     patience = 3
-    losses_dev = []
+    best_val_loss = []
     
     for epoch in pbar:
         loss = train_loop(train_loader, optimizer, criterion_train, model, clip)    
@@ -35,15 +35,18 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experim
             else:
                 ppl_dev, loss_dev = eval_loop(dev_loader, criterion_eval, model)
                 maybe_best_model = copy.deepcopy(model).to('cpu')
+                
+                if loss_dev < best_loss_val:
+                    best_loss_val = loss_dev
 
                 if nonmono_ASGD: # If the flag is set, we will enable the possibility to use ASGD
-                    if 't0' not in optimizer.param_groups[0] and (len(losses_dev)>n_nonmono and loss_dev > min(losses_dev[:-n_nonmono])):
+                    if 't0' not in optimizer.param_groups[0] and (len(best_val_loss)>n_nonmono and loss_dev > min(best_val_loss[:-n_nonmono])):
                         patience = 10
                         print("Now using ASGD, epoch", epoch)
                         optimizer = optim.ASGD(model.parameters(), lr=ASGD_lr, t0=0, lambd=0, weight_decay=0)
             
+                best_val_loss.append(loss_dev)
             
-            losses_dev.append(np.asarray(loss_dev).mean())
             pbar.set_description("PPL: %f" % ppl_dev)
             
             if  ppl_dev < best_ppl: # Save the best model (until now)
@@ -56,7 +59,7 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experim
             if patience <= 0: # Early stopping with patience
                 break
             
-        model.changeDropoutMask()
+        scheduler.step()
     
     return best_model.to(device)
 
@@ -100,7 +103,7 @@ def eval_loop(data, eval_criterion, model): #Evaluate the model on a specific se
 
     with torch.no_grad(): #We are not interested in the gradients
         for sample in data:
-            output = model(sample['source'])
+            output = model(sample['source'], train=False)
             loss = eval_criterion(output, sample['target'])
             loss_array.append(loss.item())
             

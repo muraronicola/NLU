@@ -5,7 +5,7 @@ import copy
 from tqdm import tqdm
 import os
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experiment_number, criterion_train, criterion_eval, device="cpu", n_epochs=100, clip=5): #Main logic of training the whole model for one 'experiment'
+def execute_experiment(model, train_loader, dev_loader, optimizer, scheduler, experiment_number, criterion_train, criterion_eval, device="cpu", n_epochs=100, clip=5): #Main logic of training the whole model for one 'experiment'
     print("Starting experiment " + str(experiment_number) + "...\n")
     
     #Utility variables
@@ -30,6 +30,8 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, lang, experim
                 
             if patience <= 0: # Early stopping with patience
                 break
+        
+        scheduler.step()
             
     return best_model.to(device)
 

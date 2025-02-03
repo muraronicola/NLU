@@ -3,6 +3,7 @@ from utils import LoadData
 from model import LM_LSTM
 from torch import optim
 import argparse
+from torch.optim import lr_scheduler
 
 if __name__ == "__main__":
     
@@ -41,9 +42,10 @@ if __name__ == "__main__":
         first_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"]).to(device)
         first_model.apply(init_weights)
         
-        optimizer = optim.SGD(first_model.parameters(), lr=1.5)
+        optimizer = optim.SGD(first_model.parameters(), lr=5)
+        scheduler = lr_scheduler.LinearLR(optimizer, start_factor=0.9, end_factor=1, total_iters=20)
         
-        first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, experiment_number=1, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
+        first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, scheduler, experiment_number=1, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
         ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 1:")
         first_trained_model.to("cpu") #Offload some of the memory of the GPU
@@ -51,12 +53,13 @@ if __name__ == "__main__":
         
         
         #Second experiment
-        second_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.3, out_dropout=0.3, pad_index=lang.word2id["<pad>"]).to(device)
+        second_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.5, out_dropout=0.5, pad_index=lang.word2id["<pad>"]).to(device)
         second_model.apply(init_weights)
         
-        optimizer = optim.SGD(second_model.parameters(), lr=1.5)
+        optimizer = optim.SGD(second_model.parameters(), lr=5)
+        scheduler = lr_scheduler.LinearLR(optimizer, start_factor=0.9, end_factor=1, total_iters=20)
         
-        second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, lang, experiment_number=2, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
+        second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, scheduler, experiment_number=2, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
         ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 2:")
         second_trained_model.to("cpu") #Offload some of the memory of the GPU
@@ -64,7 +67,7 @@ if __name__ == "__main__":
         
         
         #Third experiment
-        third_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.1, out_dropout=0.1, pad_index=lang.word2id["<pad>"]).to(device)
+        third_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.5, out_dropout=0.5, pad_index=lang.word2id["<pad>"]).to(device)
         third_model.apply(init_weights)
         
         optimizer = optim.AdamW(third_model.parameters(), lr=0.0005)
@@ -95,7 +98,8 @@ if __name__ == "__main__":
         
         criterion_eval = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"], reduction='sum')
         
-        best_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.3, out_dropout=0.3, pad_index=lang.word2id["<pad>"])
+        best_model = LM_LSTM(emb_size=600, hidden_size=500, output_size=len(lang.word2id), emb_dropout=0.5, out_dropout=0.5, pad_index=lang.word2id["<pad>"]).to(device)
+
         best_model.load_state_dict(state_dict)
         best_model.to(device)
 
