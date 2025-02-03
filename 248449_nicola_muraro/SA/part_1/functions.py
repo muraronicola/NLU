@@ -55,8 +55,7 @@ def train_loop(data, optimizer, criterion_slots, model, device="cpu", clip=5): #
         
         inputs_bert = get_input_bert(sample, device)
         
-        slots = model(inputs_bert)
-        slots = align_slots(slots, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'], device)
+        slots = model(inputs_bert, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'])
         
         loss = criterion_slots(slots, sample['y_slots'])
         loss_array.append(loss.item())
@@ -88,8 +87,7 @@ def eval_loop(data, criterion_slots, model, lang, pad_token, device="cpu"):
         for sample in data:
             inputs_bert = get_input_bert(sample, device)
             
-            slots = model(inputs_bert)
-            slots = align_slots(slots, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'], device)
+            slots = model(inputs_bert, sample['frase_testo'], sample['text_suddiviso'], sample['length_token_bert'])
             
             loss = criterion_slots(slots, sample['y_slots'])
             loss_array.append(loss.item())
@@ -137,63 +135,6 @@ def get_input_bert(sample, device): #Get the input for the BERT model
     inputs_bert = {'input_ids': tensor_input_ids, 'attention_mask': tensor_attention_mask, 'token_type_ids': tensor_token_type_ids}
     return inputs_bert
 
-
-def align_slots(results_slotFilling, frase_testo, text_suddiviso, length_token_bert, device): #Align the slots with the original text
-    #We need to pad the sequences to have the same length
-    shapeDim_1 = results_slotFilling[0].shape[1]
-    
-    for i in range(len(frase_testo)):
-        frase = []
-        daFondere = []
-        contatore = 0
-        
-        parole = text_suddiviso[i]
-        
-        indice_slot = 0
-        for j in range(0, len(parole)):
-            parola = parole[j]
-            length_token = length_token_bert[0][parola]
-
-            if(length_token > 1):
-                media = torch.mean(torch.stack([results_slotFilling[i][indice_slot+k] for k in range(length_token) if indice_slot + k < len(results_slotFilling[i])]), dim=0)
-                frase.append(media)
-                contatore += length_token - 1 
-                indice_slot += length_token
-            else:
-                frase.append(results_slotFilling[i, indice_slot]) #We need to count how many tokens we need to add at the end of the sequence
-                indice_slot += 1
-        
-        num_padding = results_slotFilling.shape[1] - len(frase)
-        for l in range(num_padding):
-            frase.append(torch.zeros(shapeDim_1).to(device))
-            
-        newEntry = torch.stack(frase, dim=0)
-        results_slotFilling[i] = newEntry
-    
-    
-    results_slotFilling = results_slotFilling.permute(0,2,1)
-    return results_slotFilling
-
-def init_weights(mat):
-    for m in mat.modules():
-        if type(m) in [nn.GRU, nn.LSTM, nn.RNN]:
-            for name, param in m.named_parameters():
-                if 'weight_ih' in name:
-                    for idx in range(4):
-                        mul = param.shape[0]//4
-                        torch.nn.init.xavier_uniform_(param[idx*mul:(idx+1)*mul])
-                elif 'weight_hh' in name:
-                    for idx in range(4):
-                        mul = param.shape[0]//4
-                        torch.nn.init.orthogonal_(param[idx*mul:(idx+1)*mul])
-                elif 'bias' in name:
-                    param.data.fill_(0)
-        else:
-            if type(m) in [nn.Linear]:
-                torch.nn.init.uniform_(m.weight, -0.01, 0.01)
-                if m.bias != None:
-                    m.bias.data.fill_(0.01)
-                    
 
 def save_best_model(best_model, lang, path="./bin/"):
     base_filename = "best_model_"

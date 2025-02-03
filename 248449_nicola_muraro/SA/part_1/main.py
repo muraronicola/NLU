@@ -45,7 +45,6 @@ if __name__ == "__main__":
         
         #First experiment
         first_model = ModelIAS(model_bert_base, hiddenSize_new, out_slot, drop_value=0.1, device=device).to(device)
-        first_model.apply(init_weights)
         optimizer = optim.Adam(first_model.parameters(), lr=0.00005) #Non so nemmeno che modello devo ottimizzare
         
         first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, pad_token, device=device)
