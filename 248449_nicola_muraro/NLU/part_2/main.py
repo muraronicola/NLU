@@ -50,8 +50,7 @@ if __name__ == "__main__":
         
 
         #First experiment
-        first_model = ModelIAS(model_bert_base, hiddenSize_new, out_slot, out_int, drop_value=0.1, device=device).to(device)
-        first_model.apply(init_weights)
+        first_model = ModelIAS(model_bert_base, hiddenSize_new, out_slot, out_int, drop_value=0.1).to(device)
         optimizer = optim.Adam(model_bert_base.parameters(), lr=0.0001)
         
         first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, lang, criterion_slots, criterion_intents, device=device)
@@ -72,7 +71,7 @@ if __name__ == "__main__":
         load_data = LoadData(train_path, test_path, tokenizer_bert_base, device=device, pad_token=pad_token, lang=lang)
         train_loader, dev_loader, test_loader = load_data.get_dataset_loaders()
 
-        best_model = ModelIAS(model_bert_base, hiddenSize_new, len(lang.slot2id), len(lang.intent2id), drop_value=0.1, device=device)
+        best_model = ModelIAS(model_bert_base, hiddenSize_new, len(lang.slot2id), len(lang.intent2id), drop_value=0.1).to(device)
         best_model.load_state_dict(state_dict)
         best_model.to(device)
 

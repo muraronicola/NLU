@@ -5,7 +5,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 class ModelIAS(nn.Module):
 
-    def __init__(self, model_bert, hiddenSize, out_slot, out_int, drop_value=0.1, device="cpu"):
+    def __init__(self, model_bert, hiddenSize, out_slot, out_int, drop_value=0.1):
         super(ModelIAS, self).__init__()
         self.bert = model_bert #The petrained model
         
@@ -14,8 +14,9 @@ class ModelIAS(nn.Module):
         self.slotFillingLayer = nn.Linear(hiddenSize, out_slot) #The projection head for the slot filling task
         self.intentLayer = nn.Linear(hiddenSize, out_int) #The projection head for the intent classification task
         
-        self.__device = device
-    
+        #Initializing only the weights of the projection heads
+        torch.nn.init.uniform_(self.slotFillingLayer.weight, -0.01, 0.01)
+        torch.nn.init.uniform_(self.intentLayer.weight, -0.01, 0.01)
     
     def forward(self, utterance):
         predictionBert = self.bert(**utterance) #Get the output of the pretrained model
