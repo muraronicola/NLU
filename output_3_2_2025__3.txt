@@ -1,0 +1,203 @@
+\n\nLM part 1
+\nFirst execution
+
+Results of the best save model:
+Train:	PPL 39.73	loss 3.68
+Dev:	PPL 117.85	loss 4.77
+Test:	PPL 106.87	loss 4.67
+
+
+--------------------------------------------------
+
+
+\nSecond execution
+Starting experiment 1...
+
+
+Results of experiment 1:
+Train:	PPL 51.12	loss 3.93
+Dev:	PPL 141.96	loss 4.96
+Test:	PPL 138.78	loss 4.93
+
+
+--------------------------------------------------
+
+
+Starting experiment 2...
+
+
+Results of experiment 2:
+Train:	PPL 57.39	loss 4.05
+Dev:	PPL 126.8	loss 4.84
+Test:	PPL 122.1	loss 4.8
+
+
+--------------------------------------------------
+
+
+Starting experiment 3...
+
+
+Results of experiment 3:
+Train:	PPL 37.57	loss 3.63
+Dev:	PPL 118.21	loss 4.77
+Test:	PPL 106.74	loss 4.67
+
+
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+--------------------------------------------------
+
+The best model is the third model, with a dev PPL of 118.21291544211181
+
+--------------------------------------------------
+--------------------------------------------------
+\nThird execution
+
+Results of the best save model:
+Train:	PPL 37.57	loss 3.63
+Dev:	PPL 118.21	loss 4.77
+Test:	PPL 106.74	loss 4.67
+
+
+--------------------------------------------------
+
+
+\n\nLM part 2
+\nFirst execution
+
+Results of the best save model:
+Train:	PPL 29.56	loss 3.39
+Dev:	PPL 91.26	loss 4.51
+Test:	PPL 88.97	loss 4.49
+
+
+--------------------------------------------------
+
+
+\nSecond execution
+Starting experiment 1...
+
+
+Results of experiment 1:
+Train:	PPL 65.11	loss 4.18
+Dev:	PPL 132.93	loss 4.89
+Test:	PPL 130.46	loss 4.87
+
+
+--------------------------------------------------
+
+
+Starting experiment 2...
+
+
+Results of experiment 2:
+Train:	PPL 43.54	loss 3.77
+Dev:	PPL 101.18	loss 4.62
+Test:	PPL 98.99	loss 4.6
+
+
+--------------------------------------------------
+
+
+Starting experiment 3...
+
+Now using ASGD, epoch 58
+
+Results of experiment 3:
+Train:	PPL 32.51	loss 3.48
+Dev:	PPL 97.71	loss 4.58
+Test:	PPL 95.34	loss 4.56
+
+
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+--------------------------------------------------
+
+The best model is the third model, with a dev PPL of 97.7135222867854
+
+--------------------------------------------------
+--------------------------------------------------
+\nThird execution
+
+Results of the best save model:
+Train:	PPL 32.51	loss 3.48
+Dev:	PPL 97.71	loss 4.58
+Test:	PPL 95.34	loss 4.56
+
+
+--------------------------------------------------
+
+
+\n\nNLU part 1
+\nFirst execution
+
+Results of the best model:
+Slot F1 0.941
+Intent Acc 0.948
+
+
+--------------------------------------------------
+
+
+\nSecond execution
+Starting experiment 1...
+
+
+Results of experiment 1:
+Slot F1 0.936 +- 0.004
+Intent Acc 0.942 +- 0.004
+
+
+--------------------------------------------------
+
+
+Starting experiment 2...
+
+
+Results of experiment 2:
+Slot F1 0.945 +- 0.001
+Intent Acc 0.957 +- 0.001
+
+
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+--------------------------------------------------
+
+The best model is the second model, with a dev slot f1 of 0.945
+
+--------------------------------------------------
+--------------------------------------------------
+\nThird execution
+
+Results of the best model:
+Slot F1 0.944
+Intent Acc 0.953
+
+
+--------------------------------------------------
+
+
+\n\nNLU part 2
+\nFirst execution
+
+Results of the experiment:
+Slot F1 0.951
+Intent Acc 0.963
+
+
+--------------------------------------------------
+
+
+\nSecond execution
+Starting experiment...
+

@@ -7,7 +7,7 @@ import numpy as np
 import os
 from torch import optim
 
-def execute_experiment(model, train_loader, dev_loader, optimizer, scheduler, experiment_number, criterion_train, criterion_eval, device="cpu", n_epochs=100, clip=5, ASGD_lr=2.5, n_nonmono=5, nonmono_ASGD=False):
+def execute_experiment(model, train_loader, dev_loader, optimizer, experiment_number, criterion_train, criterion_eval, scheduler=None, device="cpu", n_epochs=100, clip=5, ASGD_lr=2.5, n_nonmono=5, nonmono_ASGD=False):
     print("Starting experiment " + str(experiment_number) + "...\n")
     
     best_model = copy.deepcopy(model).to('cpu')
@@ -15,6 +15,7 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, scheduler, ex
     pbar = tqdm(range(1, n_epochs))
     patience = 3
     best_val_loss = []
+    best_loss_val = math.inf
     
     for epoch in pbar:
         loss = train_loop(train_loader, optimizer, criterion_train, model, clip)    
@@ -58,8 +59,9 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, scheduler, ex
                 
             if patience <= 0: # Early stopping with patience
                 break
-            
-        scheduler.step()
+        
+        if scheduler != None:
+            scheduler.step()
     
     return best_model.to(device)
 

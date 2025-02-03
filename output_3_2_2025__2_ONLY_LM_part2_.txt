@@ -1,0 +1,31 @@
+\n\nLM part 1
+\nFirst execution
+\nSecond execution
+\nThird execution
+\n\nLM part 2
+\nFirst execution
+
+Results of the best save model:
+Train:	PPL 29.56	loss 3.39
+Dev:	PPL 91.26	loss 4.51
+Test:	PPL 88.97	loss 4.49
+
+
+--------------------------------------------------
+
+
+\nSecond execution
+Starting experiment 1...
+
+
+Results of experiment 1:
+Train:	PPL 71.19	loss 4.27
+Dev:	PPL 132.44	loss 4.89
+Test:	PPL 129.97	loss 4.87
+
+
+--------------------------------------------------
+
+
+Starting experiment 2...
+

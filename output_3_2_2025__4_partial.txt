@@ -1,0 +1,75 @@
+\n\nLM part 1
+\nFirst execution
+\nSecond execution
+\nThird execution
+\n\nLM part 2
+\nFirst execution
+\nSecond execution
+\nThird execution
+\n\nNLU part 1
+\nFirst execution
+\nSecond execution
+\nThird execution
+\n\nNLU part 2
+\nFirst execution
+
+Results of the experiment:
+Slot F1 0.951
+Intent Acc 0.963
+
+
+--------------------------------------------------
+
+
+\nSecond execution
+Starting experiment...
+
+
+Results of the experiment:
+Slot F1 0.945
+Intent Acc 0.961
+
+
+--------------------------------------------------
+
+
+\nThird execution
+
+Results of the experiment:
+Slot F1 0.945
+Intent Acc 0.961
+
+
+--------------------------------------------------
+
+
+\n\nSA part 1
+\nFirst execution
+
+Results of the experiment:
+Slot F1 0.745
+
+
+--------------------------------------------------
+
+
+\nSecond execution
+Starting experiment...
+
+
+Results of the experiment:
+Slot F1 0.728
+
+
+--------------------------------------------------
+
+
+\nThird execution
+
+Results of the experiment:
+Slot F1 0.728
+
+
+--------------------------------------------------
+
+

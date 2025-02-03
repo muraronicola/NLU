@@ -45,7 +45,7 @@ if __name__ == "__main__":
         optimizer = optim.SGD(first_model.parameters(), lr=5)
         scheduler = lr_scheduler.LinearLR(optimizer, start_factor=0.9, end_factor=1, total_iters=20)
         
-        first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, scheduler, experiment_number=1, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
+        first_trained_model = execute_experiment(first_model, train_loader, dev_loader, optimizer, scheduler=scheduler, experiment_number=1, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
         ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(first_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_1, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 1:")
         first_trained_model.to("cpu") #Offload some of the memory of the GPU
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         optimizer = optim.SGD(second_model.parameters(), lr=5)
         scheduler = lr_scheduler.LinearLR(optimizer, start_factor=0.9, end_factor=1, total_iters=20)
         
-        second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, scheduler, experiment_number=2, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
+        second_trained_model = execute_experiment(second_model, train_loader, dev_loader, optimizer, scheduler=scheduler, experiment_number=2, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
         ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 2:")
         second_trained_model.to("cpu") #Offload some of the memory of the GPU
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         
         optimizer = optim.AdamW(third_model.parameters(), lr=0.0005)
         
-        third_trained_model = execute_experiment(third_model, train_loader, dev_loader, optimizer, lang, experiment_number=3, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
+        third_trained_model = execute_experiment(third_model, train_loader, dev_loader, optimizer, experiment_number=3, criterion_train=criterion_train, criterion_eval=criterion_eval, device=device) #Train the model
         ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(third_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_3, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 3:")
         third_trained_model.to("cpu") #Offload some of the memory of the GPU
