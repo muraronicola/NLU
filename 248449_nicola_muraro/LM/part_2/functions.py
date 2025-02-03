@@ -15,7 +15,6 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, experiment_nu
     pbar = tqdm(range(1, n_epochs))
     patience = 3
     best_val_loss = []
-    best_loss_val = math.inf
     
     for epoch in pbar:
         loss = train_loop(train_loader, optimizer, criterion_train, model, clip)    
@@ -37,9 +36,6 @@ def execute_experiment(model, train_loader, dev_loader, optimizer, experiment_nu
                 ppl_dev, loss_dev = eval_loop(dev_loader, criterion_eval, model)
                 maybe_best_model = copy.deepcopy(model).to('cpu')
                 
-                if loss_dev < best_loss_val:
-                    best_loss_val = loss_dev
-
                 if nonmono_ASGD: # If the flag is set, we will enable the possibility to use ASGD
                     if 't0' not in optimizer.param_groups[0] and (len(best_val_loss)>n_nonmono and loss_dev > min(best_val_loss[:-n_nonmono])):
                         patience = 10

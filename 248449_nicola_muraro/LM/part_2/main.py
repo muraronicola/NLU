@@ -40,7 +40,7 @@ if __name__ == "__main__":
         
         
         #First experiment
-        first_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"], device=device).to(device)
+        """first_model = LM_LSTM(emb_size=600, hidden_size=600, output_size=len(lang.word2id), pad_index=lang.word2id["<pad>"], device=device).to(device)
         first_model.apply(init_weights)
         
         optimizer = optim.SGD(first_model.parameters(), lr=1.5)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test = evaluate_experiment(second_trained_model, train_loader, dev_loader, test_loader, criterion_eval) #Evaluate the model
         print_results(ppl_train, ppl_dev_2, ppl_test, loss_train, loss_dev, loss_test, title="Results of experiment 2:")
         second_trained_model.to("cpu") #Offload some of the memory of the GPU
-        
+        """
         
         
         #Third experiment
